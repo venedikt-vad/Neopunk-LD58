@@ -61,7 +61,7 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
     Ray gravRay2 = { (position + Vector3UnitZ * playerSize + Vector3Normalize(VectorPlaneProject(velocity,Vector3UnitZ))* playerSize ), Vector3UnitZ*-1 };
     RayCollision collisionDataFall = GetRayCollisionMesh(gravRay, modelMap.meshes[0], mapMatrix);
     RayCollision collisionDataFall2 = GetRayCollisionMesh(gravRay2, modelMap.meshes[0], mapMatrix);
-    if ((collisionDataFall.hit && collisionDataFall.distance <= playerSize + 0.05)||(collisionDataFall2.hit && collisionDataFall2.distance <= playerSize + 0.05)) {
+    if ((collisionDataFall.hit && collisionDataFall.distance <= playerSize + 0.0001)||(collisionDataFall2.hit && collisionDataFall2.distance <= playerSize + 0.001)) {
         if (Vector3DotProduct(collisionDataFall.normal, Vector3UnitZ)>=floorAngle) {
             velocity.z = 0.0f;
             isGrounded = true;
@@ -118,34 +118,13 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
     do {
         // Using 3 Rays (from center and sides) to check for collisions
         Ray moveRay = { (position + Vector3UnitZ * playerSize), Vector3Normalize(movementVector) };
-        //Ray moveRayL = { (position + Vector3UnitZ * playerSize - rightV * playerSize), Vector3Normalize(movementVector) };
-        //Ray moveRayR = { (position + Vector3UnitZ * playerSize + rightV * playerSize), Vector3Normalize(movementVector) };
-
         RayCollision collisionData = GetRayCollisionMesh(moveRay, modelMap.meshes[0], mapMatrix);
-        //RayCollision collisionDataL = GetRayCollisionMesh(moveRayL, modelMap.meshes[0], mapMatrix); // FIXED: was moveRay
-        //RayCollision collisionDataR = GetRayCollisionMesh(moveRayR, modelMap.meshes[0], mapMatrix);
 
         // Check if any ray has valid collision and distance is within movement range
-        bool centerHit = collisionData.hit && collisionData.distance - playerSize <= Vector3Length(movementVector);
-        bool leftHit = false;// collisionDataL.hit&& collisionDataL.distance - playerSize <= Vector3Length(movementVector);
-        bool rightHit = false;/// collisionDataR.hit && collisionDataR.distance - playerSize <= Vector3Length(movementVector);
-
+        bool foundCollision = collisionData.hit && collisionData.distance - playerSize <= Vector3Length(movementVector);
+       
         // Find the closest collision
-        RayCollision closestCollision = { 0 };
-        bool foundCollision = false;
-
-        if (centerHit) {
-            closestCollision = collisionData;
-            foundCollision = true;
-        }
-        /*if (leftHit && (!foundCollision || collisionDataL.distance < closestCollision.distance)) {
-            closestCollision = collisionDataL;
-            foundCollision = true;
-        }
-        if (rightHit && (!foundCollision || collisionDataR.distance < closestCollision.distance)) {
-            closestCollision = collisionDataR;
-            foundCollision = true;
-        }*/
+        RayCollision closestCollision = collisionData;
 
         if (!foundCollision) {
             position += movementVector;
@@ -159,6 +138,8 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
 
         // Project movement vector onto collision plane to slide
         movementVector = VectorPlaneProject(movementVector, closestCollision.normal);
+        
+        //Right now bugged but should work
         //velocity = VectorPlaneProject(velocity, closestCollision.normal);
 
         // If remaining movement is very small, stop sliding
@@ -170,6 +151,31 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
         collisionCount++;
 
     } while (collisionCount < 6 && Vector3Length(movementVector) > 0.001f);
+
+
+    Ray moveRayL = { (position + Vector3UnitZ * playerSize - rightV * playerSize), Vector3Normalize(movementVector) };
+    Ray moveRayR = { (position + Vector3UnitZ * playerSize + rightV * playerSize), Vector3Normalize(movementVector) };
+    RayCollision collisionDataL = GetRayCollisionMesh(moveRayL, modelMap.meshes[0], mapMatrix);
+    RayCollision collisionDataR = GetRayCollisionMesh(moveRayR, modelMap.meshes[0], mapMatrix);
+
+    if (collisionDataL.hit) {
+        if (Vector3DotProduct(collisionDataL.normal, Vector3UnitZ) < floorAngle) {
+            vec3 posCorrection = PointPlaneProject(position, collisionDataL.point, collisionDataL.normal);
+            if (Vector3Distance(posCorrection, position) < playerSize) {
+                position = posCorrection + collisionDataL.normal * playerSize;
+            }
+        }
+        
+    }
+    if (collisionDataR.hit) {
+        if (Vector3DotProduct(collisionDataR.normal, Vector3UnitZ) < floorAngle) {
+            vec3 posCorrection = PointPlaneProject(position, collisionDataR.point, collisionDataR.normal);
+            if (Vector3Distance(posCorrection, position) < playerSize) {
+                position = posCorrection + collisionDataR.normal * playerSize;
+            }
+        }
+    }
+
 
     // Fancy collision system against the floor
     if (position.z <= -10.0f) {

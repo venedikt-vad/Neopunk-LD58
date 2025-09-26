@@ -35,3 +35,30 @@ const vec3 VectorNormalProject(vec3 vector, vec3 planeNormal) {
     // Project vector onto normal: (v·n) * n
     return Vector3Scale(normalizedNormal, dotProduct);
 }
+
+const vec3 PointPlaneProject(vec3 point, vec3 planeBase, vec3 planeNormal) {
+    // Normalize the plane normal
+    vec3 normalizedNormal = Vector3Normalize(planeNormal);
+
+    // Vector from plane base to the point
+    vec3 pointToPlane = Vector3Subtract(point, planeBase);
+
+    // Project this vector onto the plane normal
+    vec3 normalProjection = VectorNormalProject(pointToPlane, normalizedNormal);
+
+    // Subtract the normal projection from the original point to get the projection on the plane
+    return Vector3Subtract(point, normalProjection);
+}
+
+const float PointPlaneDistance(vec3 point, vec3 planeBase, vec3 planeNormal) {
+    // Normalize the plane normal
+    vec3 normalizedNormal = Vector3Normalize(planeNormal);
+
+    // Vector from plane base to the point
+    vec3 pointToPlane = Vector3Subtract(point, planeBase);
+
+    // The distance is the absolute value of the projection onto the normal
+    float distance = Vector3DotProduct(pointToPlane, normalizedNormal);
+
+    return fabsf(distance);
+}
