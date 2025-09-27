@@ -81,9 +81,10 @@ int main(void) {
         pt1.scale = 1;
         pt1.collisions = true;
         pt1.gravity = true;
+        //pt1.spriteOrigin = { .5,0 };
     }
     
-    em1 = new Emitter<Particle>(32, pt1);
+    em1 = new Emitter<Particle>(16, pt1);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateGame, 60, 1);

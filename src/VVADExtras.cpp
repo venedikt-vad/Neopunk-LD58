@@ -88,3 +88,37 @@ const Rectangle GetTextureRectangle(Texture tex){
 const vec2 GetTextureSize(Texture tex) {
     return {(float)tex.width, (float)tex.height };
 }
+
+
+float randomFloat0to1() {
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+}
+
+float randomFloatInRange(float min, float max) {
+    if (min > max) {
+        float temp = min;
+        min = max;
+        max = temp;
+    }
+    return max + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+}
+
+vec3 Vector3UnitRandom() {
+    vec3 v = Vector3RotateByAxisAngle(Vector3UnitX, Vector3UnitZ, randomFloatInRange(0, 360));
+    vec3 cross = Vector3CrossProduct(v, Vector3UnitZ);
+    v = Vector3RotateByAxisAngle(v, cross, randomFloatInRange(0, 360));
+    return v;
+}
+
+vec3 Vector3ConeRandom(vec3 dir, float angle) {
+    angle = angle * DEG2RAD;
+    dir = Vector3Normalize(dir);
+    vec3 temp = Vector3UnitY;
+    if (Vector3DotProduct(temp, dir) >= 0.95)temp = Vector3UnitZ;
+    temp = Vector3CrossProduct(dir, temp);
+
+    vec3 v = Vector3RotateByAxisAngle(dir, temp, randomFloatInRange(-angle, angle));
+    v = Vector3RotateByAxisAngle(v, dir, randomFloatInRange(0, 360));
+
+    return v;
+}

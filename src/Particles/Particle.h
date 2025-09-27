@@ -6,12 +6,17 @@
 struct ParticleParams {
 	Texture tex;
 	float scale = 1;
+	vec2 spriteOrigin = { .5f,.5f };
+	bool upZ = true;
+
 	float lifetime = 5;
+	
 	bool gravity = false;
+	vec3 gravityVec = Vector3UnitZ * -9.4;
+
 	bool collisions = false;
 	float bounceAmount = 0.6;
 	int maxBounces = 5;
-
 };
 
 class Particle {
