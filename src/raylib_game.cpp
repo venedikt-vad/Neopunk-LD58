@@ -84,7 +84,7 @@ int main(void) {
         //pt1.spriteOrigin = { .5,0 };
     }
     
-    em1 = new Emitter<Particle>(16, pt1);
+    em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateGame, 60, 1);
@@ -129,7 +129,7 @@ static void UpdateGame(void) {
         BeginMode3D(player->camera); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             em1->Draw(player->camera);
-            DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
+            //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);
         }
         EndMode3D();
