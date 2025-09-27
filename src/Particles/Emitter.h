@@ -16,14 +16,18 @@ public:
 	float initial_velocity = 2;
 
 	float spawn_period = 0.3;
+	int spawn_count = 1;
 
 	ParticleParams params;
 
-	Emitter(ParticleParams p = {0}, vec3 pos = Vector3Zeros, vec3 dir = Vector3UnitZ, size_t maxParticles = 64) {
+	bool active = true;
+
+	Emitter(ParticleParams p = {0}, vec3 pos = Vector3Zeros, vec3 dir = Vector3UnitZ, bool autoActivate = true, size_t maxParticles = 64) {
 		position = pos;
 		direction = Vector3Normalize(dir);
 		if (abs(Vector3Length(dir)-1)>0.01) initial_velocity = Vector3Length(dir);
 		params = p;
+		active = autoActivate;
 		max_particles = maxParticles;
 		particles.reserve(max_particles);
 	};
@@ -38,8 +42,10 @@ public:
 	};
 
 	void Update(float deltaTime, Model modelMap, Matrix mapMatrix) {
-		if ((GetTime()-last_spawn_t >= spawn_period) && (particles.size() < max_particles)) {
-			SpawnParticle(position, Vector3ConeRandom(direction, cone_radius) * initial_velocity);
+		if (active) {
+			if ((GetTime() - last_spawn_t >= spawn_period) && (particles.size() < max_particles)) {
+				SpawnParticles();
+			}
 		}
 
 		if (particles.size() <= 0)return;
@@ -60,17 +66,27 @@ public:
 		}
 	};
 
-	void SpawnParticle(vec3 loc, vec3 dir) {
-		if (particles.size() >= max_particles) return;
-		ParticleType* newParticle = new ParticleType(loc, dir, &params);
-		particles.push_back(newParticle);
-		last_spawn_t = GetTime();
-	};
+	void SpawnParticles() {
+		for (size_t i = 0; i < spawn_count; i++) {
+			if (!SpawnParticle(position, Vector3ConeRandom(direction, cone_radius) * initial_velocity)) break;
+		}
+	}
+
+	
 
 
 private:
 	size_t max_particles = 32;
 	float last_spawn_t = -100;
 	std::vector<ParticleType*> particles;
+
+	bool SpawnParticle(vec3 loc, vec3 dir) {
+		if (particles.size() >= max_particles) return false;
+		ParticleType* newParticle = new ParticleType(loc, dir, &params);
+		particles.push_back(newParticle);
+		last_spawn_t = GetTime();
+
+		return true;
+	};
 };
 

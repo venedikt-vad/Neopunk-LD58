@@ -81,10 +81,12 @@ int main(void) {
         pt1.scale = 1;
         pt1.collisions = true;
         pt1.gravity = true;
-        //pt1.spriteOrigin = { .5,0 };
+        pt1.spriteOrigin = { .5,0 };
     }
     
-    em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 });
+    em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, true);
+    //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
+    //em1->spawn_count = 20;
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateGame, 60, 1);
@@ -119,7 +121,7 @@ static void UpdateGame(void) {
     if (!player)return;
     player->Update(d, modelMap,mapMatrix);
 
-    if(IsKeyPressed(KEY_E))em1->SpawnParticle({ 15,0,1.5 }, { 15,0,0 });
+    //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     em1->Update(d, modelMap, mapMatrix);
     // Draw
     //----------------------------------------------------------------------------------
