@@ -17,6 +17,9 @@
     #include <emscripten/emscripten.h>
 #endif
 
+#define RLIGHTS_IMPLEMENTATION
+#include "rlights.h"
+
 #include <string>
 #include "VVADExtras.h"
 #include "PlayerFP.h"
@@ -33,14 +36,16 @@ PlayerFP* player = nullptr;
 
 Model modelMap;
 Matrix mapMatrix;
+
+Shader sh1;
+Light lights[MAX_LIGHTS] = { 0 };
+
 Texture2D texture;
+
 
 
 Emitter<Particle>* em1;
 
-//----------------------------------------------------------------------------------
-// Global Variables Definition (local to this module)
-//----------------------------------------------------------------------------------
 static const int screenWidth = 1920;
 static const int screenHeight = 1080;
 
@@ -66,15 +71,30 @@ int main(void) {
 
     player = new PlayerFP();
 
+    sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth.fs"));
+    sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
 
     modelMap = LoadModel("resources/TestMap.obj");
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
+
     Material mat = LoadMaterialDefault();
-    SetModelMeshMaterial(&modelMap, 0, mat.shader.id);
-    
+    mat.shader = sh1;
+    modelMap.materials[0] = mat;
     modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
     mapMatrix = MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
+
+    // Ambient light level (some basic lighting)
+    int ambientLoc = GetShaderLocation(sh1, "ambient");
+    float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
+
+    // Create lights
+    
+    lights[0] = CreateLight(LIGHT_POINT, { -2, 1, -2 }, Vector3Zero(), BLUE, sh1);
+    //lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), RED, sh1);
+    //lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), GREEN, sh1);
+    //lights[3] = CreateLight(LIGHT_POINT, { 2, 1, -2 }, Vector3Zero(), BLUE, sh1);
 
     ParticleParams pt1; {
         pt1.tex = texture;
@@ -83,10 +103,11 @@ int main(void) {
         pt1.gravity = true;
         pt1.spriteOrigin = { .5,0 };
     }
-    
     em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, true);
     //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
     //em1->spawn_count = 20;
+
+    
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateGame, 60, 1);
@@ -121,19 +142,27 @@ static void UpdateGame(void) {
     if (!player)return;
     player->Update(d, modelMap,mapMatrix);
 
+    SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player->camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     em1->Update(d, modelMap, mapMatrix);
+
+    lights[0].position = player->camera.position;
+    lights[0].attenuation = 4;
+    UpdateLightValues(sh1, lights[0]);
+
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing(); {
         ClearBackground(RAYWHITE);
 
-        BeginMode3D(player->camera); {
+        BeginMode3D(player->camera);
+        BeginShaderMode(sh1); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             em1->Draw(player->camera);
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);
         }
+        EndShaderMode();
         EndMode3D();
 
         DrawFPS(10, 10);

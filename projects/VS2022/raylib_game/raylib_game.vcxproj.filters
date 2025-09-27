@@ -17,6 +17,7 @@
     <ClInclude Include="..\..\..\src\Particles\Emitter.h">
       <Filter>Particles</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\rlights.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

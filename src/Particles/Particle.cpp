@@ -2,6 +2,10 @@
 
 //#define DEBUG_PARTICLES
 
+Particle::Particle()
+{
+}
+
 Particle::Particle(vec3 loc, vec3 velocity, ParticleParams* params) {
 	p = params;
 	pos = loc;

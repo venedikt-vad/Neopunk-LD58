@@ -371,6 +371,7 @@
     <ClInclude Include="..\..\..\src\Particles\Particle.h" />
     <ClInclude Include="..\..\..\src\Particles\Emitter.h" />
     <ClInclude Include="..\..\..\src\PlayerFP.h" />
+    <ClInclude Include="..\..\..\src\rlights.h" />
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
