@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\PlayerFP.cpp" />
+    <ClCompile Include="..\..\..\src\raylib_game.cpp" />
+    <ClCompile Include="..\..\..\src\VVADExtras.cpp" />
+    <ClCompile Include="..\..\..\src\Particles\Particle.cpp">
+      <Filter>Particles</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\src\PlayerFP.h" />
+    <ClInclude Include="..\..\..\src\VVADExtras.h" />
+    <ClInclude Include="..\..\..\src\Particles\Particle.h">
+      <Filter>Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Particles\Emitter.h">
+      <Filter>Particles</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Particles">
+      <UniqueIdentifier>{788530e2-ef0f-42f9-ba50-0ee47ee2137f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -165,7 +165,6 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
                 position = posCorrection + collisionDataL.normal * playerSize;
             }
         }
-        
     }
     if (collisionDataR.hit) {
         if (Vector3DotProduct(collisionDataR.normal, Vector3UnitZ) < floorAngle) {
@@ -175,7 +174,6 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
             }
         }
     }
-
 
     // Fancy collision system against the floor
     if (position.z <= -10.0f) {

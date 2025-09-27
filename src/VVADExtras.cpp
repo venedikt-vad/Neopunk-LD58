@@ -4,6 +4,15 @@ const Ray GetCameraRay(Camera cam) {
     return { cam.position, Vector3Normalize({ cam.target - cam.position }) };
 }
 
+const vec3 GetCameraUp(Camera cam) {
+    return Vector3CrossProduct(GetCameraRight(cam), cam.target - cam.position);
+}
+
+const vec3 GetCameraRight(Camera cam) {
+
+    return Vector3CrossProduct(cam.target - cam.position, cam.up);
+}
+
 
 
 const Matrix MakeTransformMatrix(vec3 offset, vec3 rotation, vec3 scale) {
@@ -61,4 +70,21 @@ const float PointPlaneDistance(vec3 point, vec3 planeBase, vec3 planeNormal) {
     float distance = Vector3DotProduct(pointToPlane, normalizedNormal);
 
     return fabsf(distance);
+}
+
+const std::string FloatToString(float value) {
+    return std::to_string(value);
+}
+
+const std::string Vec3ToString(vec3 value) {
+    std::string s = "x: " + std::to_string(value.x) + " y: " + std::to_string(value.y) + " z: " + std::to_string(value.z);
+    return s;
+}
+
+const Rectangle GetTextureRectangle(Texture tex){
+    return {0,0, (float)tex.width, (float)tex.height};
+}
+
+const vec2 GetTextureSize(Texture tex) {
+    return {(float)tex.width, (float)tex.height };
 }
