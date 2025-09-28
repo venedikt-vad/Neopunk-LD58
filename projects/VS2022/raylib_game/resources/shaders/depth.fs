@@ -1,254 +1,278 @@
 #version 330
-// Input vertex attributes (from vertex shader)
+// Inputs from vertex shader
 in vec2 fragTexCoord;
 in vec4 fragColor;
 in vec3 fragPosition;
 in vec3 fragNormal;
-// Input uniform values
+
+// Uniforms
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
-// Output fragment color
-out vec4 finalColor;
-// NOTE: Add here your custom variables
 uniform vec3 viewPos;
-#define     MAX_LIGHTS              4
+
+#define     MAX_LIGHTS              32
+
+//light types
 #define     LIGHT_DIRECTIONAL       0
 #define     LIGHT_POINT             1
 #define     LIGHT_SPOT              2
+
+//enabled states
+#define     LIGHT_DISABLED              0
+#define     LIGHT_SIMPLE                1
+#define     LIGHT_SIMPLE_AND_VOLUMETRIC 2
 
 struct Light {
     int enabled;
     int type;
     vec3 position;
-    vec3 target; // For spot lights, represents the direction
+    vec3 direction;       // was 'target'
     vec4 color;
-    float range; // Add range for point lights to define volume size
-    float spotAngle; // Add angle for spot lights (cosine of inner angle)
+    float radius;         // attenuation/range (also cone height for spot)
+    float spotAngle;      // degrees
 };
 
-// Input lighting values
+// Lighting uniforms
 uniform Light lights[MAX_LIGHTS];
 uniform vec4 ambient;
 
-// Volumetric light parameters
-uniform float volumetricSteps = 16.0; // Might not be needed for this approach, but keep if you want to subdivide the calculated distance
+// Volumetrics
+uniform float volumetricSteps = 16.0;      // kept for future subdiv if needed
 uniform float volumetricIntensity = 0.1;
 uniform float volumetricScattering = 0.1;
-// Add a parameter for light volume size (e.g., radius for point light, cone angle for spot light)
-uniform float pointLightVolumeRadius = 10.0; // Example default radius
-uniform float spotLightCutoffAngle = 0.785; // Example default cutoff angle (45 degrees in radians)
 
+out vec4 finalColor;
 
-// Function to calculate ray-sphere intersection (for point lights)
-// Returns true if hit, fills tNear and tFar with intersection distances along the ray
-// Ray: origin = rayOrigin, direction = rayDir (should be normalized)
-// Sphere: center = sphereCenter, radius = sphereRadius
+// ------------ Helpers ------------
+const float EPSILON = 1e-5;
+
+float attenuationByRadius(float dist, float radius) {
+    // Hard cutoff at radius, smooth near the edge
+    if (radius <= 0.0) return 0.0;
+    float nd = clamp(dist / radius, 0.0, 1.0);
+    // inverse-square inside, gentle fade at the end
+    float invSq = 1.0 / max(dist*dist, 1e-3);
+    float edge  = smoothstep(1.0, 0.8, nd);
+    return invSq * edge;
+}
+
+// Ray-sphere
 bool intersectRaySphere(vec3 rayOrigin, vec3 rayDir, vec3 sphereCenter, float sphereRadius, out float tNear, out float tFar) {
     vec3 L = sphereCenter - rayOrigin;
     float tca = dot(L, rayDir);
-    float dSquared = dot(L, L) - tca * tca;
-    float radiusSquared = sphereRadius * sphereRadius;
-
-    if (dSquared > radiusSquared) return false; // Ray misses the sphere
-
-    float thc = sqrt(radiusSquared - dSquared);
+    float d2 = dot(L, L) - tca * tca;
+    float r2 = sphereRadius * sphereRadius;
+    if (d2 > r2) return false;
+    float thc = sqrt(max(r2 - d2, 0.0));
     tNear = tca - thc;
-    tFar = tca + thc;
-
-    // If tNear is behind the ray origin, the ray starts inside the sphere
+    tFar  = tca + thc;
     if (tNear < 0.0) tNear = 0.0;
-
-    // If both are negative, the ray points away from the sphere
-    if (tFar < 0.0) return false;
-
+    if (tFar  < 0.0) return false;
     return true;
 }
 
-// Function to calculate ray-cone intersection (for spot lights)
-// Simplified: Assumes cone axis is along -target direction, apex at light position
-// Returns true if hit, fills tNear and tFar with intersection distances along the ray
-// This is a more complex intersection, this is a basic example assuming infinite cone
-// You might need to clip it at a certain range.
-bool intersectRayCone(vec3 rayOrigin, vec3 rayDir, vec3 coneApex, vec3 coneAxis, float cosAngle, out float tNear, out float tFar) {
-    // Simplified infinite cone calculation
-    // coneAxis should be normalized (direction from apex)
-    // cosAngle is cosine of the half-angle of the cone
-    vec3 V = rayOrigin - coneApex;
-    float a = dot(rayDir, coneAxis);
-    float b = dot(V, coneAxis);
-    float c = dot(rayDir, rayDir);
-    float d = dot(V, rayDir);
-    float e = dot(V, V);
+// Finite cone (apex at light, axis = +coneAxis, height = coneHeight)
+bool intersectRayCone(
+    vec3 rayOrigin,
+    vec3 rayDir,
+    vec3 coneApex,
+    vec3 coneAxis,
+    float cosAngle,     // cos(theta)
+    float coneHeight,
+    out float tNear,
+    out float tFar
+) {
+    const float EPS = 1e-6;
+    const float BIAS = 1e-5;
 
-    float cosAngleSq = cosAngle * cosAngle;
+    vec3 axis = normalize(coneAxis);
+    vec3 co   = rayOrigin - coneApex;
 
-    // Coefficients for quadratic equation At^2 + Bt + C = 0
-    float A = c * cosAngleSq - a * a;
-    float B = 2.0 * (d * cosAngleSq - a * b);
-    float C = e * cosAngleSq - b * b;
+    float cos2 = cosAngle * cosAngle;
+    float sin2 = max(0.0, 1.0 - cos2);
+    float k    = sqrt(max(0.0, sin2 / max(EPS, cos2))); // tan(theta)
 
-    // Solve quadratic
-    float discriminant = B * B - 4.0 * A * C;
+    float vd  = dot(rayDir, axis);
+    float coV = dot(co, axis);
+    float kk1 = 1.0 + k*k;
 
-    if (discriminant < 0.0) return false; // No intersection
+    float A = dot(rayDir, rayDir) - kk1 * vd * vd;
+    float B = 2.0 * (dot(rayDir, co) - kk1 * vd * coV);
+    float C = dot(co, co) - kk1 * coV * coV;
 
-    float sqrtDiscriminant = sqrt(discriminant);
-    float t1 = (-B - sqrtDiscriminant) / (2.0 * A);
-    float t2 = (-B + sqrtDiscriminant) / (2.0 * A);
+    float tHits[3];
+    int   hitCount = 0;
 
-    // Ensure t1 <= t2
-    if (t1 > t2) { float temp = t1; t1 = t2; t2 = temp; }
-
-    // Check if intersections are in front of ray origin
-    if (t2 < 0.0) return false; // Both intersections are behind
-
-    // Check if the ray starts inside the cone volume (optional, set tNear accordingly)
-    vec3 startToApex = rayOrigin - coneApex;
-    vec3 startDir = normalize(startToApex);
-    float startCosTheta = dot(startDir, coneAxis);
-    bool startInside = startCosTheta > cosAngle; // Check if starting point is inside the infinite cone
-
-    if (startInside) {
-        tNear = 0.0; // Start inside, so near point is 0
-        tFar = max(t1, t2); // Take the further intersection as the exit
-        if (tFar < 0.0) return false; // Exit is also behind
+    // lateral
+    if (abs(A) < EPS) {
+        if (abs(B) > EPS) {
+            float t = -C / B;
+            float z = coV + t * vd;
+            if (t >= BIAS && z >= 0.0 && z <= coneHeight)
+                tHits[hitCount++] = t;
+        }
     } else {
-        tNear = t1;
-        tFar = t2;
-        if (tNear < 0.0) tNear = 0.0; // Start outside, clip near to 0 if behind origin
-        if (tFar < 0.0) return false; // Exit is behind origin
+        float disc = B*B - 4.0*A*C;
+        if (disc >= 0.0) {
+            float s = sqrt(disc);
+            float inv2A = 0.5 / A;
+            float t0 = (-B - s) * inv2A;
+            float t1 = (-B + s) * inv2A;
+
+            float z0 = coV + t0 * vd;
+            if (t0 >= BIAS && z0 >= 0.0 && z0 <= coneHeight)
+                tHits[hitCount++] = t0;
+
+            float z1 = coV + t1 * vd;
+            if (t1 >= BIAS && z1 >= 0.0 && z1 <= coneHeight)
+                tHits[hitCount++] = t1;
+        }
     }
 
-    // Optional: Clip to light range if needed
-    // float lightRange = lights[lightIndex].range; // Use if range is available in struct
-    // if (tNear > lightRange || tFar < 0.0 /* or tNear > tFar*/) return false;
-    // tNear = min(tNear, lightRange);
-    // tFar = min(tFar, lightRange);
+    // base disk
+    vec3 baseCenter = coneApex + axis * coneHeight;
+    float denom = dot(rayDir, axis);
+    if (abs(denom) > EPS) {
+        float tPlane = dot(baseCenter - rayOrigin, axis) / denom;
+        if (tPlane >= BIAS) {
+            vec3 p = rayOrigin + tPlane * rayDir;
+            float r = coneHeight * k;
+            if (length(p - baseCenter) <= r + 1e-6)
+                tHits[hitCount++] = tPlane;
+        }
+    }
 
+    if (hitCount == 0) return false;
+
+    bool insideLateral = (C < 0.0) && (coV >= 0.0) && (coV <= coneHeight);
+    if (insideLateral) {
+        float tMinPos = 1e30;
+        for (int i = 0; i < hitCount; ++i) tMinPos = min(tMinPos, tHits[i]);
+        if (tMinPos < 1e29) { tNear = 0.0; tFar = tMinPos; return true; }
+        return false;
+    }
+
+    tNear = tHits[0];
+    tFar  = tHits[0];
+    for (int i = 1; i < hitCount; ++i) {
+        tNear = min(tNear, tHits[i]);
+        tFar  = max(tFar, tHits[i]);
+    }
     return true;
 }
 
-
-// Function to calculate volumetric light contribution based on intersection depths
-// This is a simplified version. You might want to integrate density along the distance differently.
 vec3 calculateVolumetricLight_DepthBased(int lightIndex, float intersectionBegin, float intersectionEnd, float fragPositionDepth) {
-    // 5. Calculate volumetrics distance
-    // The effective distance through the volume the fragment "sees"
-    // This is the distance along the camera ray within the light volume
-    // that is *in front of* the camera and *behind* the visible geometry (fragPositionDepth)
-    float effectiveStart = max(intersectionBegin, 0.0); // Ensure start is not behind camera
-    float effectiveEnd = min(intersectionEnd, fragPositionDepth); // End is either volume exit or geometry depth
-    float effectiveDistance = max(effectiveEnd - effectiveStart, 0.0); // Ensure positive distance
+    float effectiveStart = max(intersectionBegin, 0.0);
+    float effectiveEnd   = min(intersectionEnd, fragPositionDepth);
+    float effectiveDistance = max(effectiveEnd - effectiveStart, 0.0);
 
-    // 6. Apply volumetrics to the final color
-    // This is a very basic calculation. You could use volumetricSteps to subdivide this distance
-    // and apply a more complex density/integration model.
     vec3 lightColor = lights[lightIndex].color.rgb;
     vec3 contribution = lightColor * volumetricIntensity * volumetricScattering * effectiveDistance;
 
-    // Optional: Apply falloff based on distance from light center or camera
     float distanceToLightCenter = length(lights[lightIndex].position - fragPosition);
-    float falloff = exp(-distanceToLightCenter * 0.02); // Example exponential falloff
+    float falloff = exp(-distanceToLightCenter * 0.02);
     contribution *= falloff;
 
-    return clamp(contribution, 0.0, 1.0); // Clamp to prevent extreme values
+    return clamp(contribution, 0.0, 1.0);
 }
 
-
+// ------------ main ------------
 void main() {
     vec4 texelColor = texture(texture0, fragTexCoord);
     vec3 normal = normalize(fragNormal);
     vec3 viewD = normalize(viewPos - fragPosition);
     vec4 tint = colDiffuse * fragColor;
 
-    // Calculate base lighting (your original lighting)
-    vec4 finalColorBase = texelColor * (ambient / 10.0) * tint; // ambient light
+    // base ambient
+    vec4 finalColorBase = texelColor * (ambient / 10.0) * tint;
+
     for (int i = 0; i < MAX_LIGHTS; i++) {
-        if (lights[i].enabled == 1) {
-            vec3 lightResult = vec3(0.0);
-            if (lights[i].type == LIGHT_POINT) {
-                lightResult = mix(lights[i].color, vec4(0,0,0,1), min(length(lights[i].position - fragPosition)/3,1)).rgb;
-            }
-            else if (lights[i].type == LIGHT_SPOT) {
-                // Spot light calculation
-                vec3 lightDir = normalize(lights[i].position - fragPosition);
-                vec3 spotDir = normalize(-lights[i].target);
-                float theta = dot(lightDir, spotDir);
-                float epsilon = 0.1;
-                float intensity = clamp((theta - 0.8) / epsilon, 0.0, 1.0);
-                if (intensity > 0.0) {
-                    float distance = length(lights[i].position - fragPosition);
-                    float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
-                    float diff = max(dot(normal, lightDir), 0.0);
-                    vec3 diffuse = diff * lights[i].color.rgb;
-                    vec3 reflectDir = reflect(-lightDir, normal);
-                    float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
-                    vec3 specular = spec * lights[i].color.rgb * 0.5;
-                    lightResult = (diffuse + specular) * attenuation * intensity;
-                }
-            }
-            finalColorBase += texelColor * vec4(lightResult, 0.0) * tint;
+        if ((lights[i].enabled != LIGHT_SIMPLE) && (lights[i].enabled != LIGHT_SIMPLE_AND_VOLUMETRIC)) continue;
+
+        vec3 lightResult = vec3(0.0);
+
+        if (lights[i].type == LIGHT_POINT) {
+            float dist = length(lights[i].position - fragPosition);
+            float att  = attenuationByRadius(dist, lights[i].radius);
+            vec3 L     = normalize(lights[i].position - fragPosition);
+            float diff = max(dot(normal, L), 0.0);
+            vec3 diffuse  = diff * lights[i].color.rgb;
+            vec3 reflectDir = reflect(-L, normal);
+            float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
+            vec3 specular = spec * lights[i].color.rgb * 0.5;
+            lightResult = (diffuse + specular) * att;
         }
+        else if (lights[i].type == LIGHT_SPOT) {
+            vec3 Ldir = normalize(lights[i].position - fragPosition);
+            vec3 Sdir = normalize(lights[i].direction);            // NEW
+            float theta = dot(-Ldir, Sdir);                        // angle between to-frag and spot axis
+            float cosOuter = cos(radians(lights[i].spotAngle));    // NEW (degrees → radians)
+            float cosInner = cos(radians(max(lights[i].spotAngle - 5.0, 0.0))); // small feather (5°)
+
+            float spotFactor = clamp((theta - cosOuter) / max(cosInner - cosOuter, 1e-4), 0.0, 1.0);
+
+            float dist = length(lights[i].position - fragPosition);
+            float att  = attenuationByRadius(dist, lights[i].radius);
+
+            float diff = max(dot(normal, Ldir), 0.0);
+            vec3 diffuse  = diff * lights[i].color.rgb;
+            vec3 reflectDir = reflect(-Ldir, normal);
+            float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
+            vec3 specular = spec * lights[i].color.rgb * 0.5;
+
+            lightResult = (diffuse + specular) * att * spotFactor;
+        }
+        // directional (optional): simple lambert
+        else if (lights[i].type == LIGHT_DIRECTIONAL) {
+            vec3 L = normalize(-lights[i].direction);
+            float diff = max(dot(normal, L), 0.0);
+            vec3 diffuse  = diff * lights[i].color.rgb;
+            vec3 reflectDir = reflect(-L, normal);
+            float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
+            vec3 specular = spec * lights[i].color.rgb * 0.25;
+            lightResult = diffuse + specular;
+        }
+
+        finalColorBase += texelColor * vec4(lightResult, 0.0) * tint;
     }
 
-    // Calculate volumetric lighting based on depth intersection
+    // Volumetrics
     vec3 volumetricLight = vec3(0.0);
-
     if (volumetricIntensity > 0.001) {
-        // Get the camera ray direction (direction from camera to fragment, normalized)
         vec3 rayDir = normalize(fragPosition - viewPos);
-        // Calculate the depth of the current fragment (distance from camera)
         float fragPositionDepth = length(fragPosition - viewPos);
 
         for (int i = 0; i < MAX_LIGHTS; i++) {
-            if (lights[i].enabled == 1) {
-                float intersectionBegin = -1.0;
-                float intersectionEnd = -1.0;
-                bool intersects = false;
+            if (lights[i].enabled != LIGHT_SIMPLE_AND_VOLUMETRIC) continue;
 
-                // 1. Check if current pixel ray intersects light volume
-                if (lights[i].type == LIGHT_POINT) {
-                    // Use the defined volume radius for point lights
-                    float lightRadius = pointLightVolumeRadius; // Use uniform or potentially lights[i].range if added to struct
-                    intersects = intersectRaySphere(viewPos, rayDir, lights[i].position, lightRadius, intersectionBegin, intersectionEnd);
-                } else if (lights[i].type == LIGHT_SPOT) {
-                    // Use the defined cutoff angle for spot lights
-                    float cosCutoff = cos(spotLightCutoffAngle); // Calculate cosine once
-                    vec3 coneAxis = normalize(-lights[i].target); // Assuming target defines direction
-                    intersects = intersectRayCone(viewPos, rayDir, lights[i].position, coneAxis, cosCutoff, intersectionBegin, intersectionEnd);
-                }
-                // Add other light types if needed (e.g., directional box?)
+            float t0, t1;
+            bool hit = false;
 
-                // 2. If intersects, get intersection begin and end points (already calculated in 'intersects' call)
-                if (intersects) {
-                    // 3. Calculate pixel depth from fragPosition (already calculated as fragPositionDepth)
+            if (lights[i].type == LIGHT_POINT) {
+                hit = intersectRaySphere(viewPos, rayDir, lights[i].position, max(lights[i].radius, 0.0), t0, t1);
+            } else if (lights[i].type == LIGHT_SPOT) {
+                float cosCut = cos(radians(lights[i].spotAngle));
+                // Use radius as cone height/range
+                hit = intersectRayCone(viewPos, rayDir, lights[i].position, normalize(lights[i].direction), cosCut, max(lights[i].radius, 0.0), t0, t1);
+            }
 
-                    // 4. If fragPosition closer than intersectionBegin, do not draw volumetrics
-                    if (fragPositionDepth >= intersectionBegin) {
-                         // 5. Calculate volumetrics distance and 6. apply to final color
-                         vec3 volLight = calculateVolumetricLight_DepthBased(i, intersectionBegin, intersectionEnd, fragPositionDepth);
-                         volumetricLight += volLight;
-                    }
-                    // else: fragment is in front of the light volume, no volumetrics
-                }
-                // else: no intersection, no volumetrics from this light
+            if (hit && fragPositionDepth >= t0) {
+                volumetricLight += calculateVolumetricLight_DepthBased(i, t0, t1, fragPositionDepth);
             }
         }
     }
 
-    // Combine base lighting with volumetric lighting
     vec4 result = finalColorBase + vec4(volumetricLight, 0.0);
-    // Ensure we don't exceed reasonable values
     result = clamp(result, 0.0, 2.0);
 
-    // Gamma correction
-    finalColor = pow(result, vec4(1.0/2.2));
+    // Gamma
+    result = pow(result, vec4(1.0/2.2));
 
     // Fog
     float fogStart = 20.0;
-    float fogEnd = 200.0;
-    vec3 fogColor = vec3(1.,1.,1.);
+    float fogEnd   = 200.0;
+    vec3  fogColor = vec3(1.0);
     float dist = length(viewPos - fragPosition);
     float depth = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
-    finalColor = vec4(mix(finalColor.rgb, fogColor, depth), 1.0f);
+    finalColor = vec4(mix(result.rgb, fogColor, depth), 1.0);
 }

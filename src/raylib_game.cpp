@@ -21,6 +21,8 @@
 #include "rlights.h"
 
 #include <string>
+#include <cmath>
+
 #include "VVADExtras.h"
 #include "PlayerFP.h"
 
@@ -91,10 +93,17 @@ int main(void) {
 
     // Create lights
     
-    lights[0] = CreateLight(LIGHT_SPOT, { 17,7,7. }, Vector3UnitZ*-1, Color{ 255, 250, 240, 255 }, sh1);
-    lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), RED, sh1);
-    lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), GREEN, sh1);
-    lights[3] = CreateLight(LIGHT_POINT, { 2, 1, -2 }, Vector3Zero(), BLUE, sh1);
+    lights[0] = CreateLight(LIGHT_SPOT, { 17,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1, LIGHT_SIMPLE_AND_VOLUMETRIC);
+    lights[4] = CreateLight(LIGHT_SPOT, { 19,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
+    lights[5] = CreateLight(LIGHT_SPOT, { 21,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
+    lights[6] = CreateLight(LIGHT_SPOT, { 23,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
+    lights[7] = CreateLight(LIGHT_SPOT, { 25,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
+    lights[8] = CreateLight(LIGHT_SPOT, { 17,4,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
+    
+    lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), 1.f, RED, sh1);
+    lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), 3.f, GREEN, sh1 );
+    lights[3] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), 5.f, BLUE, sh1);
+
 
     ParticleParams pt1; {
         pt1.tex = texture;
@@ -148,13 +157,13 @@ static void UpdateGame(void) {
 
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
-    //lights[0].attenuation = 4;
-    //UpdateLightValues(sh1, lights[0]);
+    lights[0].angle = (std::fmod(GetTime(),1)) * 45.f;
+    UpdateLightValues(sh1, lights[0]);
 
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing(); {
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
         BeginMode3D(player->camera);
         BeginShaderMode(sh1); {
