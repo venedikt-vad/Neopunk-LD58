@@ -17,8 +17,7 @@
     #include <emscripten/emscripten.h>
 #endif
 
-#define RLIGHTS_IMPLEMENTATION
-#include "rlights.h"
+#include "LightManager.h"
 
 #include <string>
 #include <cmath>
@@ -40,7 +39,8 @@ Model modelMap;
 Matrix mapMatrix;
 
 Shader sh1;
-Light lights[MAX_LIGHTS] = { 0 };
+LightManager* gLightMgr = nullptr;
+
 
 Texture2D texture;
 
@@ -73,7 +73,7 @@ int main(void) {
 
     player = new PlayerFP();
 
-    sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth.fs"));
+    sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
 
     modelMap = LoadModel("resources/TestMap.obj");
@@ -90,19 +90,36 @@ int main(void) {
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
     SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
-
+    gLightMgr = new LightManager(sh1);
     // Create lights
     
-    lights[0] = CreateLight(LIGHT_SPOT, { 17,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1, LIGHT_SIMPLE_AND_VOLUMETRIC);
-    lights[4] = CreateLight(LIGHT_SPOT, { 19,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
-    lights[5] = CreateLight(LIGHT_SPOT, { 21,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
-    lights[6] = CreateLight(LIGHT_SPOT, { 23,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
-    lights[7] = CreateLight(LIGHT_SPOT, { 25,7,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
-    lights[8] = CreateLight(LIGHT_SPOT, { 17,4,7. }, Vector3UnitZ * -1, 15.f, Color{ 255, 250, 240, 255 }, sh1);
-    
-    lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), 1.f, RED, sh1);
-    lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), 3.f, GREEN, sh1 );
-    lights[3] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), 5.f, BLUE, sh1);
+    LM_Light L{};
+    L.type = LM_SPOT; L.enabled = LM_SIMPLE; L.radius = 15.f; L.angle = 45.f; L.color = { 255,250,240,255 }; L.intensity = 15;
+    L.position = { 17,7,7 }; L.direction = Vector3Scale(Vector3UnitZ, -1); gLightMgr->Add(L);
+
+    L.enabled = LM_SIMPLE;
+
+    for (size_t i = 0; i < 30; i++) {
+        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 };
+
+        L.position = { 19+i*4.f,6,11 }; gLightMgr->Add(L);
+
+    }
+
+    for (size_t i = 0; i < 30; i++) {
+        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 11; L.angle = 30.f; L.color = { 255,255,150,255 };
+
+        L.position = { 12 + i * 6.f,-26,31 }; gLightMgr->Add(L);
+
+    }
+
+
+    // points:
+    LM_Light P{};
+    P.type = LM_POINT; P.enabled = LM_SIMPLE;
+    P.position = { 2,1,2 };   P.radius = 1.f; P.color = RED;   gLightMgr->Add(P);
+    P.position = { -2,1,2 };  P.radius = 3.f; P.color = GREEN; gLightMgr->Add(P);
+    P.position = { 2,1,2 };   P.radius = 5.f; P.color = BLUE;  gLightMgr->Add(P);
 
 
     ParticleParams pt1; {
@@ -142,6 +159,8 @@ int main(void) {
     return 0;
 }
 
+bool freezeLightCooling = false;
+
 // Update and draw game frame
 static void UpdateGame(void) {
     float d = GetFrameTime();
@@ -153,12 +172,18 @@ static void UpdateGame(void) {
 
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player->camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
+    if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
+    if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
+    
     em1->Update(d, modelMap, mapMatrix);
 
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
-    lights[0].angle = (std::fmod(GetTime(),1)) * 45.f;
-    UpdateLightValues(sh1, lights[0]);
+    LM_Light& edit = gLightMgr->Get(0);
+    edit.angle = fmodf((float)GetTime(), 1.0f) * 45.f;
+
+    if(!freezeLightCooling)gLightMgr->SyncToGPU(player->camera);
+    //UpdateLightsArray(sh1, lights, player->camera);
 
     // Draw
     //----------------------------------------------------------------------------------

@@ -36,11 +36,15 @@
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
-#define MAX_LIGHTS  32         // Max dynamic lights supported by shader
+#define MAX_LIGHTS  8         // Max dynamic lights supported by shader
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
+
+#include "raylib.h"
+#include "raymath.h"
+
 
 // Light data
 typedef struct {   
@@ -50,7 +54,7 @@ typedef struct {
     Vector3 direction;
     Color color;
     float radius;
-    float angle = 45;
+    float angle;
     
     // Shader locations
     int typeLoc;
@@ -85,6 +89,7 @@ extern "C" {            // Prevents name mangling of functions
 //----------------------------------------------------------------------------------
 Light CreateLight(int type, Vector3 position, Vector3 target, float radius, Color color, Shader shader, int enabled = 1);   // Create a light and get shader locations
 void UpdateLightValues(Shader shader, Light light);         // Send light properties to shader
+void UpdateLightsArray(Shader shader, Light lights[MAX_LIGHTS], Camera cam);         // Cull unseen lights and sort by distance
 
 #ifdef __cplusplus
 }
@@ -140,6 +145,7 @@ Light CreateLight(int type, Vector3 position, Vector3 target, float radius, Colo
         light.direction = target;
         light.color = color;
         light.radius = radius;
+        light.angle = 45;
 
         // NOTE: Lighting shader naming must be the provided ones
         light.enabledLoc = GetShaderLocation(shader, TextFormat("lights[%i].enabled", lightsCount));
@@ -183,5 +189,103 @@ void UpdateLightValues(Shader shader, Light light)
     SetShaderValue(shader, light.angleLoc, &light.angle, SHADER_UNIFORM_FLOAT);
 
 }
+
+void UpdateLightsArray(Shader shader, Light lights[MAX_LIGHTS], Camera cam)
+{
+    // --- helpers ---
+#ifndef RLIGHTS_PI
+#define RLIGHTS_PI 3.14159265358979323846f
+#endif
+
+// Camera forward (normalized)
+    Vector3 fwd = Vector3Normalize(Vector3Subtract(cam.target, cam.position));
+    // Half vertical FOV in radians; give ourselves a little slack ( *1.15 )
+    float halfFovRad = (cam.fovy * RLIGHTS_PI / 180.0f) * 0.5f * 1.15f;
+    float cosHalfFov = cosf(halfFovRad);
+
+    // Collect candidates: indices + distance
+    typedef struct { int idx; float dist; int origEnabled; } Candidate;
+    Candidate cand[MAX_LIGHTS];
+    int candCount = 0;
+
+    for (int i = 0; i < MAX_LIGHTS; ++i) {
+        // Skip never-enabled lights
+        if (lights[i].enabled == LIGHT_DISABLED) continue;
+
+        // Vector from camera to light
+        Vector3 toL = Vector3Subtract(lights[i].position, cam.position);
+        float   d2 = toL.x * toL.x + toL.y * toL.y + toL.z * toL.z;
+        if (d2 <= 1e-6f) d2 = 1e-6f;
+        float   dist = sqrtf(d2);
+        Vector3 dir = { toL.x / dist, toL.y / dist, toL.z / dist };
+
+        // Angular visibility: allow some expansion by light radius (bigger lights get more leeway).
+        // Expand by asin(radius/dist) but clamp to sensible range.
+        float expand = 0.0f;
+        if (lights[i].radius > 0.0f) {
+            float s = lights[i].radius / (dist + 1e-6f);
+            if (s > 1.0f) s = 1.0f;
+            expand = asinf(s);                  // radians
+        }
+        float cosExpanded = cosf(fmaxf(halfFovRad - expand, 0.0f));
+
+        // In front of camera?
+        float cosAngle = dir.x * fwd.x + dir.y * fwd.y + dir.z * fwd.z;
+        int   visible = (cosAngle >= cosExpanded);
+
+        // Optional distance cull: if the light is way beyond its range from the camera, skip it.
+        // This is conservative and cheap.
+        if (visible) {
+            float allowance = lights[i].radius * 2.0f + 5.0f; // small slack
+            if (dist > allowance && lights[i].type != LIGHT_DIRECTIONAL) {
+                // keep only if within a loose multiple of its range
+                if (dist > lights[i].radius * 6.0f) visible = 0;
+            }
+        }
+
+        if (visible) {
+            cand[candCount].idx = i;
+            cand[candCount].dist = dist;
+            cand[candCount].origEnabled = lights[i].enabled; // preserve SIMPLE vs VOLUMETRIC
+            candCount++;
+        }
+    }
+
+    // Sort candidates by distance (nearest first) – simple insertion sort (N<=8)
+    for (int a = 1; a < candCount; ++a) {
+        Candidate key = cand[a];
+        int b = a - 1;
+        while (b >= 0 && cand[b].dist > key.dist) { cand[b + 1] = cand[b]; b--; }
+        cand[b + 1] = key;
+    }
+
+    // Decide budget: we can drive up to MAX_LIGHTS but we might want to limit.
+    // Keep all visibles (shader already only has MAX_LIGHTS).
+    int activeCount = candCount;
+
+    // First disable all lights effectively (don’t mutate uniform slots we won’t use).
+    for (int i = 0; i < MAX_LIGHTS; ++i) {
+        int disabled = LIGHT_DISABLED;
+        if (lights[i].enabled != LIGHT_DISABLED) {
+            // Temporarily mark disabled; we’ll re-enable chosen ones below.
+            lights[i].enabled = LIGHT_DISABLED;
+            SetShaderValue(shader, lights[i].enabledLoc, &disabled, SHADER_UNIFORM_INT);
+        }
+    }
+
+    // Re-enable the chosen ones (nearest visibles), preserving their original enabled mode
+    for (int k = 0; k < activeCount; ++k) {
+        int i = cand[k].idx;
+        lights[i].enabled = cand[k].origEnabled; // LIGHT_SIMPLE or LIGHT_SIMPLE_AND_VOLUMETRIC
+        SetShaderValue(shader, lights[i].enabledLoc, &lights[i].enabled, SHADER_UNIFORM_INT);
+    }
+
+    // Push updated per-light values (positions/colors/etc.) for all lights
+    // (cheap enough for N<=8; keeps uniforms in sync if anything changed)
+    for (int i = 0; i < MAX_LIGHTS; ++i) {
+        UpdateLightValues(shader, lights[i]);
+    }
+}
+
 
 #endif // RLIGHTS_IMPLEMENTATION

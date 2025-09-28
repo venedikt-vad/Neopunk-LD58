@@ -359,6 +359,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\LightManager.cpp" />
     <ClCompile Include="..\..\..\src\Particles\Particle.cpp" />
     <ClCompile Include="..\..\..\src\PlayerFP.cpp" />
     <ClCompile Include="..\..\..\src\raylib_game.cpp" />
@@ -368,6 +369,7 @@
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\LightManager.h" />
     <ClInclude Include="..\..\..\src\Particles\Particle.h" />
     <ClInclude Include="..\..\..\src\Particles\Emitter.h" />
     <ClInclude Include="..\..\..\src\PlayerFP.h" />

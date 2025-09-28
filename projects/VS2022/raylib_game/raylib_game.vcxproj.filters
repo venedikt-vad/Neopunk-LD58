@@ -7,6 +7,7 @@
     <ClCompile Include="..\..\..\src\Particles\Particle.cpp">
       <Filter>Particles</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\LightManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\PlayerFP.h" />
@@ -18,6 +19,7 @@
       <Filter>Particles</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\rlights.h" />
+    <ClInclude Include="..\..\..\src\LightManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

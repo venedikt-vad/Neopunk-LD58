@@ -26,7 +26,8 @@ struct Light {
     int enabled;
     int type;
     vec3 position;
-    vec3 direction;       // was 'target'
+    vec3 direction; 
+    float intensity; // Add support
     vec4 color;
     float radius;         // attenuation/range (also cone height for spot)
     float spotAngle;      // degrees
@@ -38,7 +39,7 @@ uniform vec4 ambient;
 
 // Volumetrics
 uniform float volumetricSteps = 16.0;      // kept for future subdiv if needed
-uniform float volumetricIntensity = 0.1;
+uniform float volumetricIntensity = 0.06;
 uniform float volumetricScattering = 0.1;
 
 out vec4 finalColor;
@@ -189,6 +190,9 @@ void main() {
     for (int i = 0; i < MAX_LIGHTS; i++) {
         if ((lights[i].enabled != LIGHT_SIMPLE) && (lights[i].enabled != LIGHT_SIMPLE_AND_VOLUMETRIC)) continue;
 
+        float I = (lights[i].intensity <= 0.0) ? 1.0 : lights[i].intensity;
+
+
         vec3 lightResult = vec3(0.0);
 
         if (lights[i].type == LIGHT_POINT) {
@@ -200,7 +204,7 @@ void main() {
             vec3 reflectDir = reflect(-L, normal);
             float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
             vec3 specular = spec * lights[i].color.rgb * 0.5;
-            lightResult = (diffuse + specular) * att;
+            lightResult = ((diffuse + specular) * att) * I;
         }
         else if (lights[i].type == LIGHT_SPOT) {
             vec3 Ldir = normalize(lights[i].position - fragPosition);
@@ -220,7 +224,7 @@ void main() {
             float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
             vec3 specular = spec * lights[i].color.rgb * 0.5;
 
-            lightResult = (diffuse + specular) * att * spotFactor;
+            lightResult = ((diffuse + specular) * att * spotFactor) * I;
         }
         // directional (optional): simple lambert
         else if (lights[i].type == LIGHT_DIRECTIONAL) {
@@ -230,7 +234,7 @@ void main() {
             vec3 reflectDir = reflect(-L, normal);
             float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
             vec3 specular = spec * lights[i].color.rgb * 0.25;
-            lightResult = diffuse + specular;
+            lightResult = (diffuse + specular) * I;
         }
 
         finalColorBase += texelColor * vec4(lightResult, 0.0) * tint;
@@ -257,6 +261,7 @@ void main() {
             }
 
             if (hit && fragPositionDepth >= t0) {
+                //volumetricLight += calculateVolumetricLight_DepthBased(i, t0, t1, fragPositionDepth) * ((lights[i].intensity <= 0.0) ? 0.5 : lights[i].intensity/2.0);
                 volumetricLight += calculateVolumetricLight_DepthBased(i, t0, t1, fragPositionDepth);
             }
         }
@@ -271,7 +276,7 @@ void main() {
     // Fog
     float fogStart = 20.0;
     float fogEnd   = 200.0;
-    vec3  fogColor = vec3(1.0);
+    vec3  fogColor = vec3(0.0);
     float dist = length(viewPos - fragPosition);
     float depth = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
     finalColor = vec4(mix(result.rgb, fogColor, depth), 1.0);
