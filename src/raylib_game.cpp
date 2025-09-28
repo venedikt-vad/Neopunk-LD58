@@ -91,7 +91,7 @@ int main(void) {
 
     // Create lights
     
-    lights[0] = CreateLight(LIGHT_POINT, { -2, 1, -2 }, Vector3Zero(), BLUE, sh1);
+    lights[0] = CreateLight(LIGHT_SPOT, { 17,7,1. }, Vector3UnitY*-1, Color{ 255, 250, 240, 255 }, sh1);
     //lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), RED, sh1);
     //lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), GREEN, sh1);
     //lights[3] = CreateLight(LIGHT_POINT, { 2, 1, -2 }, Vector3Zero(), BLUE, sh1);
@@ -146,9 +146,10 @@ static void UpdateGame(void) {
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     em1->Update(d, modelMap, mapMatrix);
 
-    lights[0].position = player->camera.position;
-    lights[0].attenuation = 4;
-    UpdateLightValues(sh1, lights[0]);
+    //lights[0].position = player->camera.position;
+    //lights[0].target = player->CameraRay().direction;
+    //lights[0].attenuation = 4;
+    //UpdateLightValues(sh1, lights[0]);
 
     // Draw
     //----------------------------------------------------------------------------------
@@ -168,6 +169,7 @@ static void UpdateGame(void) {
         DrawFPS(10, 10);
         Ray camRay = player->CameraRay();
         DrawText(Vec3ToString(camRay.position).c_str(), 10, 50, 30, RED);
+        DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, YELLOW);
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

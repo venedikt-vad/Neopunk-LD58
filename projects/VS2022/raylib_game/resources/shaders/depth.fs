@@ -19,7 +19,9 @@ uniform vec3 viewPos;
 #define     MAX_LIGHTS              4
 #define     LIGHT_DIRECTIONAL       0
 #define     LIGHT_POINT             1
+#define     LIGHT_SPOT              2
 
+//do not add new fields while prototyping
 struct Light {
     int enabled;
     int type;
@@ -44,48 +46,61 @@ void main() {
     vec4 tint = colDiffuse * fragColor;
 
     //SimpleLights
-    finalColor = texelColor*(ambient/10.0)*tint;
+
+    finalColor = texelColor*(ambient/10.0)*tint; //ambient light
 
     vec4 lightCol = vec4(0,0,0,0);
     
+    for (int i = 0; i < MAX_LIGHTS; i++) {
+        if (lights[i].enabled == 1) {
 
-    for (int i = 0; i < MAX_LIGHTS; i++)
-    {
-        if (lights[i].enabled == 1)
-        {
-            //vec3 light = vec3(0.0);
+            vec3 lightResult = vec3(0.0);
 
-            if (lights[i].type == LIGHT_DIRECTIONAL)
-            {
-                //light = -normalize(lights[i].target - lights[i].position);
+            //don't need directional light for now
+            // if (lights[i].type == LIGHT_DIRECTIONAL) {
+            //     //calculation for directional light
+            // }
+
+            if (lights[i].type == LIGHT_POINT) {
+                lightResult = mix(lights[i].color, noLightColor, min(length(lights[i].position - fragPosition)/3,1)).rgb;
+                
+                
             }
 
-            if (lights[i].type == LIGHT_POINT)
-            {
-                //light = normalize(lights[i].position - fragPosition);
-                lightCol += mix(lights[i].color, noLightColor, min(length(lights[i].position - fragPosition)/3,1));
+            if (lights[i].type == LIGHT_SPOT) {
+                //calculation for the spot light
+                vec3 lightDir = normalize(lights[i].position - fragPosition);
+                vec3 spotDir = normalize(-lights[i].target);
+                
+                float theta = dot(lightDir, spotDir);
+                float epsilon = 0.1; // Inner angle cosine
+                float intensity = clamp((theta - 0.8) / epsilon, 0.0, 1.0); // Outer angle cosine = 0.7
+                
+                if (intensity > 0.0) {
+                    float distance = length(lights[i].position - fragPosition);
+                    float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.032 * distance * distance);
+                    
+                    float diff = max(dot(normal, lightDir), 0.0);
+                    vec3 diffuse = diff * lights[i].color.rgb;
+                    
+                    vec3 reflectDir = reflect(-lightDir, normal);
+                    float spec = pow(max(dot(viewD, reflectDir), 0.0), 32.0);
+                    vec3 specular = spec * lights[i].color.rgb * 0.5;
+                    
+                    lightResult = (diffuse + specular) * attenuation * intensity;
+                }
             }
 
-            //float NdotL = max(dot(normal, light), 0.0);
-            //lightDot += lights[i].color.rgb*NdotL;
-
-            //float specCo = 0.0;
-            //if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0); // 16 refers to shine
-            //specular += specCo;
+            finalColor += texelColor * vec4(lightResult, 0.0) * tint;
+            
         }
     }
-
-    finalColor += texelColor*lightCol;
-
-    //finalColor = (texelColor*((tint + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
 
     // Gamma correction
     finalColor = pow(finalColor, vec4(1.0/2.2));
 
 
-
     //Fog
-
     float fogStart = 20.0;
     float fogEnd = 200.0;
 
