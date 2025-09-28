@@ -91,7 +91,7 @@ int main(void) {
 
     // Create lights
     
-    lights[0] = CreateLight(LIGHT_SPOT, { 17,7,1. }, Vector3UnitY*-1, Color{ 255, 250, 240, 255 }, sh1);
+    lights[0] = CreateLight(LIGHT_POINT, { 17,7,1. }, Vector3UnitZ*-1, Color{ 255, 250, 240, 255 }, sh1);
     //lights[1] = CreateLight(LIGHT_POINT, { 2, 1, 2 }, Vector3Zero(), RED, sh1);
     //lights[2] = CreateLight(LIGHT_POINT, { -2, 1, 2 }, Vector3Zero(), GREEN, sh1);
     //lights[3] = CreateLight(LIGHT_POINT, { 2, 1, -2 }, Vector3Zero(), BLUE, sh1);
