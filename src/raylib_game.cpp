@@ -149,6 +149,7 @@ int main(void) {
     em2->spawn_count = 15;
     em2->initial_velocity = 2;
 
+
     //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
     //em1->spawn_count = 20;
 
@@ -195,7 +196,6 @@ static void UpdateGame(void) {
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
     em1->Update(d, modelMap, mapMatrix);
-    //em2->position = player->camera.position;
     em2->Update(d, modelMap, mapMatrix);
 
     //lights[0].position = player->camera.position;

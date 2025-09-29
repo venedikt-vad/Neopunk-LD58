@@ -15,6 +15,7 @@ struct ParticleParams {
 	vec3 gravityVec = Vector3UnitZ * -9.4f;
 
 	bool collisions = false;
+	bool killOnCollision = false;
 	float bounceAmount = 0.6f;
 	int maxBounces = 5;
 };
