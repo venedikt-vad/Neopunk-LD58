@@ -2,8 +2,11 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "VVADExtras.h"
+
 #include<vector>
 #include <memory>
+#include <algorithm>
+//#include <execution>
 
 #include "Particle.h"
 
@@ -15,8 +18,10 @@ public:
 	float cone_radius = 15;
 	float initial_velocity = 2;
 
-	float spawn_period = 0.3;
+	float spawn_period = 0.3f;
 	int spawn_count = 1;
+
+	vec3 spawnVolumeSize = Vector3Zeros;
 
 	ParticleParams params;
 
@@ -47,16 +52,35 @@ public:
 				SpawnParticles();
 			}
 		}
+		if (particles.empty()) return;
 
-		if (particles.size() <= 0)return;
-		for (int i = particles.size(); i--; i>=0) {
+		// 1) Snapshot to iterate without mutating the vector while we loop
+		//std::vector<ParticleType*> snapshot = particles;
+
+		// 2) Parallel update
+		//std::for_each(std::execution::par_unseq, snapshot.begin(), snapshot.end(),
+		//	[&](ParticleType* pt) {
+		//		if (pt) pt->Update(deltaTime, modelMap, mapMatrix);
+		//	});
+
+#pragma omp parallel for schedule(static)
+		for (int i = 0; i < (int)particles.size(); ++i) {
 			ParticleType* pt = particles[i];
-			if (pt) {
-				pt->Update(deltaTime, modelMap, mapMatrix);
-				if (pt->pendingDestroy)particles.erase(particles.begin() + i);
-			}
+			if (pt) pt->Update(deltaTime, modelMap, mapMatrix);
 		}
+
+		// 3) Single-threaded compaction + deletion of dead particles
+		particles.erase(
+			std::remove_if(particles.begin(), particles.end(),
+				[](ParticleType* pt) {
+					if (!pt) return true;
+					if (pt->pendingDestroy) { delete pt; return true; }
+					return false;
+				}),
+			particles.end()
+		);
 	};
+
 	
 	void Draw(Camera cam) {
 		for (ParticleType* pt : particles) {
@@ -77,12 +101,16 @@ public:
 
 private:
 	size_t max_particles = 32;
-	float last_spawn_t = -100;
+	double last_spawn_t = -100;
 	std::vector<ParticleType*> particles;
 
 	bool SpawnParticle(vec3 loc, vec3 dir) {
+		vec3 SpawnLoc = loc;
+		if (Vector3Length(spawnVolumeSize) > 0) {
+			SpawnLoc = loc + Vector3RandomInVolume(spawnVolumeSize) - (spawnVolumeSize/2.f);
+		}
 		if (particles.size() >= max_particles) return false;
-		ParticleType* newParticle = new ParticleType(loc, dir, &params);
+		ParticleType* newParticle = new ParticleType(SpawnLoc, dir, &params);
 		particles.push_back(newParticle);
 		last_spawn_t = GetTime();
 

@@ -199,6 +199,7 @@
       <CompileAs>Default</CompileAs>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\src;$(SolutionDir)..\..\src\external;$(SolutionDir)..\..\..\raylib\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
+      <OpenMPSupport>yes</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

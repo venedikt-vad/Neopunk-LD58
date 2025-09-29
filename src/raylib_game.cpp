@@ -47,6 +47,7 @@ Texture2D texture;
 
 
 Emitter<Particle>* em1;
+Emitter<Particle>* em2;
 
 static const int screenWidth = 1920;
 static const int screenHeight = 1080;
@@ -130,6 +131,24 @@ int main(void) {
         pt1.spriteOrigin = { .5,0 };
     }
     em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, true);
+
+
+    ParticleParams pt2; {
+        pt2.tex = texture;
+        pt2.scale = .04f;
+        pt2.collisions = false;
+        pt2.gravity = false;
+        pt2.upZ = false;
+        pt2.spriteOrigin = { 0,0 };
+        pt2.lifetime = 3;
+    }
+    em2 = new Emitter<Particle>(pt2, { 48,6,1.5 }, { 1,0,0 }, true, 256);
+    em2->cone_radius = 360;
+    em2->spawnVolumeSize = { 30,30,3 };
+    em2->spawn_period = 0.1;
+    em2->spawn_count = 15;
+    em2->initial_velocity = 2;
+
     //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
     //em1->spawn_count = 20;
 
@@ -176,6 +195,8 @@ static void UpdateGame(void) {
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
     em1->Update(d, modelMap, mapMatrix);
+    //em2->position = player->camera.position;
+    em2->Update(d, modelMap, mapMatrix);
 
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
@@ -194,6 +215,8 @@ static void UpdateGame(void) {
         BeginShaderMode(sh1); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             em1->Draw(player->camera);
+
+            em2->Draw(player->camera);
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);
         }
@@ -204,6 +227,7 @@ static void UpdateGame(void) {
         Ray camRay = player->CameraRay();
         DrawText(Vec3ToString(camRay.position).c_str(), 10, 50, 30, RED);
         DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, YELLOW);
+
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

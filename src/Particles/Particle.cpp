@@ -44,7 +44,7 @@ void Particle::Update(float deltaTime, Model modelMap, Matrix mapMatrix) {
 			if (collisionDataFall.hit && collisionDataFall.distance <= Vector3Length(offset)) {
 				
 				offset = Vector3Zeros;
-				pos = collisionDataFall.point + collisionDataFall.normal*(0.01);
+				pos = collisionDataFall.point + collisionDataFall.normal*(0.01f);
 
 				if (p->bounceAmount > 0 && bounceCount<p->maxBounces) {
 					vel = Vector3ConeRandom(Vector3Reflect(vel, collisionDataFall.normal), 10) * (Vector3Length(vel) * p->bounceAmount);
