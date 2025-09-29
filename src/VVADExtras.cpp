@@ -100,13 +100,27 @@ float randomFloatInRange(float min, float max) {
         min = max;
         max = temp;
     }
-    return max + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+
+    if (min == max) {
+        return min;
+    }
+
+    return min + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * (max - min);
 }
 
 vec3 Vector3UnitRandom() {
     vec3 v = Vector3RotateByAxisAngle(Vector3UnitX, Vector3UnitZ, randomFloatInRange(0, 360));
     vec3 cross = Vector3CrossProduct(v, Vector3UnitZ);
     v = Vector3RotateByAxisAngle(v, cross, randomFloatInRange(0, 360));
+    return v;
+}
+
+vec3 Vector3RandomInVolume(vec3 volume) {
+    vec3 v = {
+        randomFloatInRange(0, volume.x),
+        randomFloatInRange(0, volume.y),
+        randomFloatInRange(0, volume.z)
+    };
     return v;
 }
 

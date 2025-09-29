@@ -34,4 +34,6 @@ float randomFloatInRange(float min, float max);
 
 vec3 Vector3UnitRandom();
 
+vec3 Vector3RandomInVolume(vec3 volume);
+
 vec3 Vector3ConeRandom(vec3 dir, float angle);
