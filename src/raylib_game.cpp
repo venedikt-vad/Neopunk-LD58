@@ -100,7 +100,7 @@ int main(void) {
     L.enabled = LM_SIMPLE;
 
     for (size_t i = 0; i < 30; i++) {
-        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 };
+        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 }; L.intensity = 15;
 
         L.position = { 19+i*4.f,6,11 }; gLightMgr->Add(L);
 
