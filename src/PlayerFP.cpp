@@ -50,7 +50,7 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
 
     //
 
-    Vector2 input = { side, -forward };
+    Vector2 input = { (float)side, -forward };
 
 #if defined(NORMALIZE_INPUT)
     // Slow down diagonal movement
@@ -221,8 +221,8 @@ void PlayerFP::UpdateCameraFPS(Camera* camera) {
 
     // Head animation
     // Rotate up direction around forward axis
-    float headSin = sin(headTimer * PI);
-    float headCos = cos(headTimer * PI);
+    float headSin = (float)sin(headTimer * PI);
+    float headCos = (float)cos(headTimer * PI);
     const float stepRotation = 0.01f;
     camera->up = Vector3RotateByAxisAngle(up, pitch, headSin * stepRotation + lean.x);
 
