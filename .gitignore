@@ -76,3 +76,5 @@ android.*
 *.wasm
 *.html
 *.js
+
+!/projects/VS2022/raylib_game/resources/
