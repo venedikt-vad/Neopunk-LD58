@@ -103,8 +103,9 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     do {
         Ray moveRayHead = { (position + (Vector3UnitZ * headOffset)), Vector3Normalize(movementVector) };
         Ray moveRayCenter = { (position + Vector3UnitZ * (playerHeight/2)), Vector3Normalize(movementVector) };
+        Ray moveRayBottom = { (position), Vector3Normalize(movementVector) };
         SphereTraceCollision collisionDataHead = cMngr->GetSphereCollision(moveRayHead, playerSize);
-        SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayCenter, playerSize);
+        SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayBottom, playerSize);
 
         bool head = false;
         bool foundCollision = false;
@@ -123,13 +124,19 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
             position += movementVector;
             break;
         }
-        vec3 newPos = head?(collisionData.point - (Vector3UnitZ * headOffset)):collisionData.point;
+
+        vec3 newPos = head? (collisionData.point - (Vector3UnitZ * headOffset)) : (collisionData.point - (Vector3UnitZ * (playerHeight / 2)));
         movementVector -= newPos - position;
         position = newPos;
 
+        if (abs(Vector3DotProduct(collisionData.normal, Vector3UnitZ)) >= floorAngle) {
+        } else {
+            collisionData.normal = Vector3Normalize({ collisionData.normal.x, collisionData.normal.y, 0 });
+        }
         // Project movement and velocity onto collision plane
         movementVector = VectorPlaneProject(movementVector, collisionData.normal);
         velocity = VectorPlaneProject(velocity, collisionData.normal);
+        
 
         // If remaining movement is very small, ignore it
         if (Vector3Length(movementVector) < 0.001f) {
@@ -161,13 +168,12 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, playerSize);
     if (gravCollision.hit && (gravCollision.distance <= playerHeight + 0.001)) {
         position = gravCollision.point;
-
         if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= floorAngle) {
             velocity.z = 0.0f;
             isGrounded = true;
         } else {
             isGrounded = false;
-            velocity = VectorPlaneProject(velocity, gravCollision.normal);
+            //velocity = VectorPlaneProject(velocity, gravCollision.normal);
         }
     } else {
         isGrounded = false;

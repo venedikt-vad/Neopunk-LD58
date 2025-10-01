@@ -41,7 +41,7 @@ public:
     Vector2 sensitivity = { 0.001f, 0.001f };
 
     float playerSize = 0.3f;
-    float floorAngle = 0.6f;
+    float floorAngle = 0.8f;
 
     PlayerFP();
     PlayerFP(Vector3 loc);
