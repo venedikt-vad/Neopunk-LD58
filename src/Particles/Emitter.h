@@ -9,6 +9,7 @@
 //#include <execution>
 
 #include "Particle.h"
+#include "Collision\CollisionManager.h"
 
 template<typename ParticleType>
 class Emitter {
@@ -46,7 +47,7 @@ public:
 		}
 	};
 
-	void Update(float deltaTime, Model modelMap, Matrix mapMatrix) {
+	void Update(float deltaTime, CollisionManager* cMngr) {
 		if (active) {
 			if ((GetTime() - last_spawn_t >= spawn_period) && (particles.size() < max_particles)) {
 				SpawnParticles();
@@ -66,7 +67,7 @@ public:
 #pragma omp parallel for schedule(static)
 		for (int i = 0; i < (int)particles.size(); ++i) {
 			ParticleType* pt = particles[i];
-			if (pt) pt->Update(deltaTime, modelMap, mapMatrix);
+			if (pt) pt->Update(deltaTime, cMngr);
 		}
 
 		// 3) Single-threaded compaction + deletion of dead particles

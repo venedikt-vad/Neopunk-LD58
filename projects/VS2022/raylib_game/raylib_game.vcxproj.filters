@@ -1,16 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\PlayerFP.cpp" />
     <ClCompile Include="..\..\..\src\raylib_game.cpp" />
     <ClCompile Include="..\..\..\src\VVADExtras.cpp" />
     <ClCompile Include="..\..\..\src\Particles\Particle.cpp">
       <Filter>Particles</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\LightManager.cpp" />
+    <ClCompile Include="..\..\..\src\PlayerFP.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Lights\LightManager.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Collision\CollisionManager.cpp">
+      <Filter>Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\SimpleDoor.cpp">
+      <Filter>SimpleDoor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\PlayerFP.h" />
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
     <ClInclude Include="..\..\..\src\Particles\Particle.h">
       <Filter>Particles</Filter>
@@ -18,8 +27,21 @@
     <ClInclude Include="..\..\..\src\Particles\Emitter.h">
       <Filter>Particles</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\rlights.h" />
-    <ClInclude Include="..\..\..\src\LightManager.h" />
+    <ClInclude Include="..\..\..\src\PlayerFP.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Lights\LightManager.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Lights\rlights.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Collision\CollisionManager.h">
+      <Filter>Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\SimpleDoor.h">
+      <Filter>SimpleDoor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
@@ -27,6 +49,18 @@
   <ItemGroup>
     <Filter Include="Particles">
       <UniqueIdentifier>{788530e2-ef0f-42f9-ba50-0ee47ee2137f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lights">
+      <UniqueIdentifier>{7a8d9759-6a3f-40ae-9430-e363de7f3b69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{0ee0e30b-b52b-4092-a9ce-c49c850305da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collision">
+      <UniqueIdentifier>{1e915e43-2cb3-4dab-9776-2ae4f526279a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimpleDoor">
+      <UniqueIdentifier>{b595922a-3b6b-4624-bf63-ac4465d4b665}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

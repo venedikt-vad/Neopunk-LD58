@@ -1,4 +1,7 @@
 #include "PlayerFP.h"
+#include <iostream>
+
+//#define NORMALIZE_INPUT
 
 PlayerFP::PlayerFP() {
     Init(Vector3Zero());
@@ -21,7 +24,7 @@ void PlayerFP::Init(Vector3 loc) {
     DisableCursor();
 }
 
-void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
+void PlayerFP::Update(float d, CollisionManager* cMngr) {
 
     //Inputs
     Vector2 mouseDelta = GetMouseDelta();
@@ -33,7 +36,10 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
     bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
     bool jumpPressed = IsKeyPressed(KEY_SPACE);
 
-    headLerp = Lerp(headLerp, (crouching ? CROUCH_HEIGHT : STAND_HEIGHT), 20.0f * d);
+    float playerHeight = GetCurrentPlayerHeight();
+    vec3 posBeforeMovement = position;
+
+    headLerp = Lerp(headLerp, (playerHeight), 20.0f * d);
 
     if (isGrounded && ((forward != 0) || (side != 0))) {
         headTimer += d * 3.0f;
@@ -57,23 +63,6 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
     if ((side != 0) && (forward != 0)) input = Vector2Normalize(input);
 #endif
 
-    Ray gravRay = { (position + Vector3UnitZ * playerSize), Vector3UnitZ * -1 };
-    Ray gravRay2 = { (position + Vector3UnitZ * playerSize + Vector3Normalize(VectorPlaneProject(velocity,Vector3UnitZ))* playerSize ), Vector3UnitZ*-1 };
-    RayCollision collisionDataFall = GetRayCollisionMesh(gravRay, modelMap.meshes[0], mapMatrix);
-    RayCollision collisionDataFall2 = GetRayCollisionMesh(gravRay2, modelMap.meshes[0], mapMatrix);
-    if ((collisionDataFall.hit && collisionDataFall.distance <= playerSize + 0.0001)||(collisionDataFall2.hit && collisionDataFall2.distance <= playerSize + 0.001)) {
-        if (Vector3DotProduct(collisionDataFall.normal, Vector3UnitZ)>=floorAngle) {
-            velocity.z = 0.0f;
-            isGrounded = true;
-            position = collisionDataFall.point;
-        } else {
-            isGrounded = false;
-            velocity = VectorPlaneProject(velocity, collisionDataFall.normal);
-        }
-       
-    } else {
-        isGrounded = false;
-    }
      
     if (!isGrounded) velocity.z -= GRAVITY * d;
 
@@ -107,78 +96,81 @@ void PlayerFP::Update(float d, Model modelMap, Matrix mapMatrix) {
     velocity.x = hvel.x;
     velocity.y = hvel.y;
 
-
-
     Vector3 movementVector = velocity * d;
 
-    Vector3 rightV = Vector3CrossProduct(Vector3Normalize(movementVector), Vector3UnitZ);
-
+    float headOffset = playerHeight + playerSize;
     int collisionCount = 0;
-
     do {
-        // Using 3 Rays (from center and sides) to check for collisions
-        Ray moveRay = { (position + Vector3UnitZ * playerSize), Vector3Normalize(movementVector) };
-        RayCollision collisionData = GetRayCollisionMesh(moveRay, modelMap.meshes[0], mapMatrix);
+        Ray moveRayHead = { (position + (Vector3UnitZ * headOffset)), Vector3Normalize(movementVector) };
+        Ray moveRayCenter = { (position + Vector3UnitZ * (playerHeight/2)), Vector3Normalize(movementVector) };
+        SphereTraceCollision collisionDataHead = cMngr->GetSphereCollision(moveRayHead, playerSize);
+        SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayCenter, playerSize);
 
-        // Check if any ray has valid collision and distance is within movement range
-        bool foundCollision = collisionData.hit && collisionData.distance - playerSize <= Vector3Length(movementVector);
-       
-        // Find the closest collision
-        RayCollision closestCollision = collisionData;
+        bool head = false;
+        bool foundCollision = false;
+        if (collisionData.hit && collisionData.distance <= Vector3Length(movementVector)) {
+            foundCollision = true;
+        } else {
+            collisionData.distance = Vector3Length(movementVector) * 10;
+        }
+        if (collisionDataHead.hit && collisionDataHead.distance <= Vector3Length(movementVector)) {
+            foundCollision = true;
+            head = true;
+            if (collisionDataHead.distance < collisionData.distance)collisionData = collisionDataHead;
+        }
 
         if (!foundCollision) {
             position += movementVector;
             break;
         }
-
-        // Set new position
-        vec3 newPos = closestCollision.point + closestCollision.normal * playerSize - Vector3UnitZ * playerSize;
+        vec3 newPos = head?(collisionData.point - (Vector3UnitZ * headOffset)):collisionData.point;
         movementVector -= newPos - position;
         position = newPos;
 
-        // Project movement vector onto collision plane to slide
-        movementVector = VectorPlaneProject(movementVector, closestCollision.normal);
-        
-        //Right now bugged but should work
-        //velocity = VectorPlaneProject(velocity, closestCollision.normal);
+        // Project movement and velocity onto collision plane
+        movementVector = VectorPlaneProject(movementVector, collisionData.normal);
+        velocity = VectorPlaneProject(velocity, collisionData.normal);
 
-        // If remaining movement is very small, stop sliding
+        // If remaining movement is very small, ignore it
         if (Vector3Length(movementVector) < 0.001f) {
             break;
         }
 
-        // Increment collision count
         collisionCount++;
 
-    } while (collisionCount < 6 && Vector3Length(movementVector) > 0.001f);
+    } while (collisionCount < MAX_MOVEMENT_COLLISIONS && Vector3Length(movementVector) > 0.001f);
 
+    //std::cout << collisionCount << std::endl;
 
-    Ray moveRayL = { (position + Vector3UnitZ * playerSize - rightV * playerSize), Vector3Normalize(movementVector) };
-    Ray moveRayR = { (position + Vector3UnitZ * playerSize + rightV * playerSize), Vector3Normalize(movementVector) };
-    RayCollision collisionDataL = GetRayCollisionMesh(moveRayL, modelMap.meshes[0], mapMatrix);
-    RayCollision collisionDataR = GetRayCollisionMesh(moveRayR, modelMap.meshes[0], mapMatrix);
-
-    if (collisionDataL.hit) {
-        if (Vector3DotProduct(collisionDataL.normal, Vector3UnitZ) < floorAngle) {
-            vec3 posCorrection = PointPlaneProject(position, collisionDataL.point, collisionDataL.normal);
-            if (Vector3Distance(posCorrection, position) < playerSize) {
-                position = posCorrection + collisionDataL.normal * playerSize;
-            }
-        }
-    }
-    if (collisionDataR.hit) {
-        if (Vector3DotProduct(collisionDataR.normal, Vector3UnitZ) < floorAngle) {
-            vec3 posCorrection = PointPlaneProject(position, collisionDataR.point, collisionDataR.normal);
-            if (Vector3Distance(posCorrection, position) < playerSize) {
-                position = posCorrection + collisionDataR.normal * playerSize;
-            }
-        }
+    //Prevent movement if too many collisions hit
+    if (collisionCount >= MAX_MOVEMENT_COLLISIONS) {
+        velocity = Vector3Zeros;
+        position = posBeforeMovement;
+        TraceLog(LOG_WARNING, "MOVEMENT FAILED: Too many collisions");
     }
 
     // Fancy collision system against the floor
     if (position.z <= -10.0f) {
         position.z = -10.0f;
         velocity.z = 0.0f;
+
+    }
+
+    //Additional floor check
+    Ray gravRay = { (position + Vector3UnitZ * playerHeight), Vector3UnitZ * -1 };
+    SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, playerSize);
+    if (gravCollision.hit && (gravCollision.distance <= playerHeight + 0.001)) {
+        position = gravCollision.point;
+
+        if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= floorAngle) {
+            velocity.z = 0.0f;
+            isGrounded = true;
+        } else {
+            isGrounded = false;
+            velocity = VectorPlaneProject(velocity, gravCollision.normal);
+        }
+    } else {
+        isGrounded = false;
     }
     
     UpdateCameraPos();
@@ -234,6 +226,10 @@ void PlayerFP::UpdateCameraFPS(Camera* camera) {
 
     camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
     camera->target = Vector3Add(camera->position, pitch);
+}
+
+float PlayerFP::GetCurrentPlayerHeight() {
+    return IsKeyDown(KEY_LEFT_CONTROL) ? CROUCH_HEIGHT : STAND_HEIGHT;
 }
 
 Ray PlayerFP::CameraRay() {

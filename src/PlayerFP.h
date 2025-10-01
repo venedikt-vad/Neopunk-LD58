@@ -2,22 +2,25 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "VVADExtras.h"
+#include "Collision\CollisionManager.h"
 
 // Movement constants
 #define GRAVITY         32.0f
-#define MAX_SPEED       20.0f
-#define CROUCH_SPEED     5.0f
+#define MAX_SPEED       25.0f
+#define CROUCH_SPEED     4.0f
 #define JUMP_FORCE      12.0f
-#define MAX_ACCEL      150.0f
+#define MAX_ACCEL      120.0f
 // Grounded drag
 #define FRICTION         0.86f
 // Increasing air drag, increases strafing speed
-#define AIR_DRAG         0.98f
+#define AIR_DRAG         0.86f
 // Responsiveness for turning movement direction to looked direction
 #define CONTROL         15.0f
 #define CROUCH_HEIGHT    0.0f
-#define STAND_HEIGHT     1.0f
-#define BOTTOM_HEIGHT    0.5f
+#define STAND_HEIGHT     .6f
+#define BOTTOM_HEIGHT    .2f
+
+#define MAX_MOVEMENT_COLLISIONS 10
 
 class PlayerFP
 {
@@ -44,10 +47,12 @@ public:
     PlayerFP(Vector3 loc);
     void Init(Vector3 loc);
 
-    void Update(float d, Model modelMap, Matrix mapMatrix);
+    void Update(float d, CollisionManager* cMngr);
 
     void UpdateCameraPos();
     void UpdateCameraFPS(Camera* camera);
+
+    float GetCurrentPlayerHeight();
 
     Ray CameraRay();
 };

@@ -17,15 +17,19 @@
     #include <emscripten/emscripten.h>
 #endif
 
-#include "LightManager.h"
 
 #include <string>
 #include <cmath>
 
 #include "VVADExtras.h"
-#include "PlayerFP.h"
-
+#include "Lights\LightManager.h"
+#include "Collision\CollisionManager.h"
 #include "Particles\Emitter.h"
+
+#include "PlayerFP.h"
+#include "SimpleDoor.h"
+
+#include <rlgl.h>
 //----------------------------------------------------------------------------------
 // Shared Variables Definition (global)
 //----------------------------------------------------------------------------------
@@ -33,18 +37,20 @@ Font font = { 0 };
 Music music = { 0 };
 Sound fxCoin = { 0 };
 
-PlayerFP* player = nullptr;
 
 Model modelMap;
 Matrix mapMatrix;
 
 Shader sh1;
 LightManager* gLightMgr = nullptr;
+CollisionManager* cMngr = nullptr;
 
 
 Texture2D texture;
+Material mat;
 
-
+PlayerFP* player = nullptr;
+SimpleDoor* door1 = nullptr;
 
 Emitter<Particle>* em1;
 Emitter<Particle>* em2;
@@ -64,6 +70,7 @@ int main(void) {
     InitWindow(screenWidth, screenHeight, "raylib game");
     InitAudioDevice();      // Initialize audio device
 
+    
     // Load global data (assets that must be available in all screens, i.e. font)
     font = LoadFont("resources/mecha.png");
     //music = LoadMusicStream("resources/ambient.ogg"); // TODO: Load music
@@ -76,17 +83,21 @@ int main(void) {
 
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
+    
 
     modelMap = LoadModel("resources/TestMap.obj");
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
-
-    Material mat = LoadMaterialDefault();
+    
+    mat = LoadMaterialDefault();
     mat.shader = sh1;
     modelMap.materials[0] = mat;
     modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
-    mapMatrix = MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
 
+    Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
+    cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
+
+    mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -130,7 +141,7 @@ int main(void) {
         pt1.gravity = true;
         pt1.spriteOrigin = { .5,0 };
     }
-    em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, true);
+    em1 = new Emitter<Particle>(pt1, { 15,3,1.5 }, { 15,0,0 }, true);
 
 
     ParticleParams pt2; {
@@ -149,9 +160,11 @@ int main(void) {
     em2->spawn_count = 15;
     em2->initial_velocity = 2;
 
-
     //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
     //em1->spawn_count = 20;
+    Transform doorTransform = { { 23.f, 9.f, 2.f }, QuaternionIdentity(), {1,6,2}};
+
+    door1 = new SimpleDoor(doorTransform, cMngr);
 
     
 
@@ -188,16 +201,17 @@ static void UpdateGame(void) {
     //----------------------------------------------------------------------------------
     //UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
     if (!player)return;
-    player->Update(d, modelMap,mapMatrix);
+    player->Update(d, cMngr);
 
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player->camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
-    em1->Update(d, modelMap, mapMatrix);
-    em2->Update(d, modelMap, mapMatrix);
+    em1->Update(d, cMngr);
+    em2->Update(d, cMngr);
 
+    door1->Update(d);
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
     LM_Light& edit = gLightMgr->Get(0);
@@ -210,15 +224,26 @@ static void UpdateGame(void) {
     //----------------------------------------------------------------------------------
     BeginDrawing(); {
         ClearBackground(BLACK);
-
+        
         BeginMode3D(player->camera);
         BeginShaderMode(sh1); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             em1->Draw(player->camera);
 
             em2->Draw(player->camera);
+
+            door1->Draw(mat);
+
+            Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
+            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1);
+            DrawSphere(gravRay.position, .1, Color{ 230, 41, 55, 255 });
+            DrawSphere(gravCollision.point, .1, Color{ 0, 231, 55, 255 });
+
+
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);
+            //DrawSphere({ 44, 13, 1 }, .5, Color{ 230, 41, 55, 100 });
+            //DrawSphere({ 44, 5, 1 }, .5, Color{ 230, 41, 55, 100 });
         }
         EndShaderMode();
         EndMode3D();
@@ -227,7 +252,6 @@ static void UpdateGame(void) {
         Ray camRay = player->CameraRay();
         DrawText(Vec3ToString(camRay.position).c_str(), 10, 50, 30, RED);
         DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, YELLOW);
-
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

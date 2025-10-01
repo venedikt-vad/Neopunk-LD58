@@ -25,7 +25,7 @@ void Particle::Draw(Camera cam) {
 
 }
 
-void Particle::Update(float deltaTime, Model modelMap, Matrix mapMatrix) {
+void Particle::Update(float deltaTime, CollisionManager* cMngr) {
 	double t = GetTime() - spawnTime;
 	
 	//Lifetime check
@@ -40,7 +40,7 @@ void Particle::Update(float deltaTime, Model modelMap, Matrix mapMatrix) {
 		vec3 offset = vel * deltaTime;
 		if (p->collisions) {
 			Ray checkRay = { pos, Vector3Normalize(vel) };
-			RayCollision collisionDataFall = GetRayCollisionMesh(checkRay, modelMap.meshes[0], mapMatrix);
+			RayCollision collisionDataFall = cMngr->GetRayCollision(checkRay);
 			if (collisionDataFall.hit && collisionDataFall.distance <= Vector3Length(offset)) {
 				
 

@@ -180,6 +180,14 @@ vec3 calculateVolumetricLight_DepthBased(int lightIndex, float intersectionBegin
 // ------------ main ------------
 void main() {
     vec4 texelColor = texture(texture0, fragTexCoord);
+    
+    if (texelColor.a == 0.0) discard;
+
+    // if(texelColor.a < 1.0){
+    //     float dithering = (noise1(fragTexCoord.x+fragTexCoord.y*fragTexCoord.x)  + 1.0) /2.0;
+    //     if(dithering>texelColor.a) discard;
+    // }
+
     vec3 normal = normalize(fragNormal);
     vec3 viewD = normalize(viewPos - fragPosition);
     vec4 tint = colDiffuse * fragColor;
@@ -208,7 +216,7 @@ void main() {
         }
         else if (lights[i].type == LIGHT_SPOT) {
             vec3 Ldir = normalize(lights[i].position - fragPosition);
-            vec3 Sdir = normalize(lights[i].direction);            // NEW
+            vec3 Sdir = normalize(lights[i].direction);            
             float theta = dot(-Ldir, Sdir);                        // angle between to-frag and spot axis
             float cosOuter = cos(radians(lights[i].spotAngle));    // NEW (degrees → radians)
             float cosInner = cos(radians(max(lights[i].spotAngle - 5.0, 0.0))); // small feather (5°)
@@ -279,5 +287,7 @@ void main() {
     vec3  fogColor = vec3(0.0);
     float dist = length(viewPos - fragPosition);
     float depth = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
-    finalColor = vec4(mix(result.rgb, fogColor, depth), 1.0);
+
+    float a = texelColor.a * colDiffuse.a * fragColor.a;
+    finalColor = vec4(mix(result.rgb, fogColor, depth), a);
 }

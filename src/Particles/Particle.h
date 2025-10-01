@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "VVADExtras.h"
+#include "Collision\CollisionManager.h"
 
 struct ParticleParams {
 	Texture tex;
@@ -31,7 +32,7 @@ public:
 
 	void Draw(Camera cam);
 
-	void Update(float deltaTime, Model modelMap, Matrix mapMatrix);
+	void Update(float deltaTime, CollisionManager* cMngr);
 
 	bool pendingDestroy = false;
 private:
