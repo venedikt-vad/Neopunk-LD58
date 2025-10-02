@@ -133,10 +133,16 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     //Gravity and grav.collision
     float movementZ = velocity.z * d;
     vec3 gravRayDir = { 0,0,(velocity.z==0?-1:velocity.z) };
-    Ray gravRay = { (position), Vector3Normalize({0,0,velocity.z }) };
+    float gravCheckOffset = (velocity.z < 0) ? (headOffset+PLAYER_HEAD_SPACE) : 0;
+    Ray gravRay = { (position+(Vector3UnitZ* gravCheckOffset)), Vector3Normalize({0,0,velocity.z }) };
     SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
-    if ((gravCollision.hit && (gravCollision.distance <= abs(movementZ) + 0.03 )) || gravCollision.initialHit) {
-        position = gravCollision.point;
+    if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ)+ gravCheckOffset + 0.03) )) || gravCollision.initialHit) {
+        if (velocity.z > 0) {
+            position = gravCollision.point - (Vector3UnitZ * gravCheckOffset);
+        } else {
+            position = gravCollision.point;
+        }
+
         if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= FLOOR_ANGLE) {
             velocity.z = 0.0f;
             isGrounded = true;
@@ -163,16 +169,16 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     //Accel calc
     float accel = WALK_ACCEL * (isGrounded ? 1 : AIR_CONTROL) * d;
     vec3 velChange = desiredDir * accel;
-    velocity += velChange;
     if (isGrounded) {
-        velocity = Vector3ClampValue(velocity, 0, crouching ? CROUCH_SPEED : WALK_SPEED);
+        velChange = Vector3ClampValue(velocity+velChange, 0, crouching ? CROUCH_SPEED : WALK_SPEED)-velocity;
     }
+    velocity += velChange;
+
     
 
     if (isGrounded && jumpPressed) {
       velocity.z = JUMP_FORCE;
       isGrounded = false;
-      std::cout << "JUMP" << std::endl;
     }
     
     UpdateCameraPos();
