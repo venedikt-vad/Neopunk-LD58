@@ -5,7 +5,7 @@
 #include "Collision\CollisionManager.h"
 
 struct ParticleParams {
-	Texture tex;
+	Texture tex = { 0 };
 	float scale = 1;
 	vec2 spriteOrigin = { .5f,.5f };
 	bool upZ = true;

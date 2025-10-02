@@ -4,7 +4,7 @@
 //#define NORMALIZE_INPUT
 
 PlayerFP::PlayerFP() {
-    Init(Vector3Zero());
+    Init({0,0,0.029});
 }
 
 PlayerFP::PlayerFP(Vector3 loc) {
@@ -53,63 +53,30 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     lean.x = Lerp(lean.x, side * 0.02f, 10.0f * d);
     lean.y = Lerp(lean.y, forward * 0.015f, 10.0f * d);
 
-
-    //
-
-    Vector2 input = { (float)side, -forward };
+    Vector2 input = { (float)side, -(float)forward};
 
 #if defined(NORMALIZE_INPUT)
     // Slow down diagonal movement
     if ((side != 0) && (forward != 0)) input = Vector2Normalize(input);
 #endif
 
-     
-    if (!isGrounded) velocity.z -= GRAVITY * d;
 
-    if (isGrounded && jumpPressed) {
-        velocity.z = JUMP_FORCE;
-        isGrounded = false;
-    }
+    Vector3 velocityXY = { velocity.x,velocity.y, 0 };
+    Vector3 movementVector = velocityXY * d;
+    movementVector.z = 0;
 
-    Vector3 front = { cos(lookRotation.x), sin(lookRotation.x), 0.f  };
-    Vector3 right = { sin(-lookRotation.x), cos(-lookRotation.x), 0.f };
+    float headOffset = playerHeight + PLAYER_RADIUS;
 
-    Vector3 desiredDir = (front * input.y) + (right * input.x);
-    dir = Vector3Lerp(dir, desiredDir, CONTROL * d);
-
-    float decel = (isGrounded ? FRICTION : AIR_DRAG);
-    Vector3 hvel = { velocity.x * decel, velocity.y * decel, 0.0f  };
-
-    float hvelLength = Vector3Length(hvel); // Magnitude
-    if (hvelLength < (MAX_SPEED * 0.01f)) hvel = Vector3Zero();
-
-    // This is what creates strafing
-    float speed = Vector3DotProduct(hvel, dir);
-
-    // Whenever the amount of acceleration to add is clamped by the maximum acceleration constant,
-    // a Player can make the speed faster by bringing the direction closer to horizontal velocity angle
-    float maxSpeed = (crouching ? CROUCH_SPEED : MAX_SPEED);
-    float accel = Clamp(maxSpeed - speed, 0.f, MAX_ACCEL * d);
-    hvel.x += dir.x * accel;
-    hvel.y += dir.y * accel;
-
-    velocity.x = hvel.x;
-    velocity.y = hvel.y;
-
-    Vector3 movementVector = velocity * d;
-
-    float headOffset = playerHeight + playerSize;
     int collisionCount = 0;
     do {
-        Ray moveRayHead = { (position + (Vector3UnitZ * headOffset)), Vector3Normalize(movementVector) };
+        Ray moveRayHead = { (position + (Vector3UnitZ * (headOffset+ PLAYER_HEAD_SPACE))), Vector3Normalize(movementVector) };
         Ray moveRayCenter = { (position + Vector3UnitZ * (playerHeight/2)), Vector3Normalize(movementVector) };
-        Ray moveRayBottom = { (position), Vector3Normalize(movementVector) };
-        SphereTraceCollision collisionDataHead = cMngr->GetSphereCollision(moveRayHead, playerSize);
-        SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayBottom, playerSize);
+        //Ray moveRayBottom = { (position), Vector3Normalize(movementVector) };
+        SphereTraceCollision collisionDataHead = cMngr->GetSphereCollision(moveRayHead, PLAYER_RADIUS);
+        SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayCenter, PLAYER_RADIUS);
 
-        bool head = false;
-        bool foundCollision = false;
-        if (collisionData.hit && collisionData.distance <= Vector3Length(movementVector)) {
+        //bool foundCollision = false;
+        /*if (collisionData.hit && collisionData.distance <= Vector3Length(movementVector)) {
             foundCollision = true;
         } else {
             collisionData.distance = Vector3Length(movementVector) * 10;
@@ -118,25 +85,34 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
             foundCollision = true;
             head = true;
             if (collisionDataHead.distance < collisionData.distance)collisionData = collisionDataHead;
-        }
+        }*/
 
-        if (!foundCollision) {
-            position += movementVector;
-            break;
-        }
+        bool head = true;
 
-        vec3 newPos = head? (collisionData.point - (Vector3UnitZ * headOffset)) : (collisionData.point - (Vector3UnitZ * (playerHeight / 2)));
+        if (!(collisionDataHead.hit && collisionDataHead.distance <= Vector3Length(movementVector)) ) {
+            if (!(collisionData.hit && collisionData.distance <= Vector3Length(movementVector))) {
+                position += movementVector;
+                break;
+            } else {
+                collisionDataHead = collisionData;
+                head = false;
+            }
+            
+        } 
+
+        vec3 newPos = collisionDataHead.point - (head?(Vector3UnitZ * (Vector3UnitZ * (headOffset + PLAYER_HEAD_SPACE))) : (Vector3UnitZ * (playerHeight / 2)));
         movementVector -= newPos - position;
         position = newPos;
 
-        if (abs(Vector3DotProduct(collisionData.normal, Vector3UnitZ)) >= floorAngle) {
-        } else {
-            collisionData.normal = Vector3Normalize({ collisionData.normal.x, collisionData.normal.y, 0 });
-        }
         // Project movement and velocity onto collision plane
-        movementVector = VectorPlaneProject(movementVector, collisionData.normal);
-        velocity = VectorPlaneProject(velocity, collisionData.normal);
-        
+        if (abs(Vector3DotProduct(collisionDataHead.normal, Vector3UnitZ)) >= FLOOR_ANGLE) {
+            velocity = VectorPlaneProject(velocity, collisionDataHead.normal);
+        } else {
+            collisionDataHead.normal = Vector3Normalize({ collisionDataHead.normal.x, collisionDataHead.normal.y, 0 });
+            velocityXY = VectorPlaneProject(velocityXY, collisionDataHead.normal);
+        }
+        movementVector = VectorPlaneProject(movementVector, collisionDataHead.normal);
+
 
         // If remaining movement is very small, ignore it
         if (Vector3Length(movementVector) < 0.001f) {
@@ -144,39 +120,59 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
         }
 
         collisionCount++;
+        if (collisionCount > MAX_MOVEMENT_COLLISIONS) {
+            position = posBeforeMovement;
+            break;
+        }
 
-    } while (collisionCount < MAX_MOVEMENT_COLLISIONS && Vector3Length(movementVector) > 0.001f);
+    } while (Vector3Length(movementVector) > 0.001f);
 
-    //std::cout << collisionCount << std::endl;
-
-    //Prevent movement if too many collisions hit
-    if (collisionCount >= MAX_MOVEMENT_COLLISIONS) {
-        velocity = Vector3Zeros;
-        position = posBeforeMovement;
-        TraceLog(LOG_WARNING, "MOVEMENT FAILED: Too many collisions");
-    }
-
-    // Fancy collision system against the floor
-    if (position.z <= -10.0f) {
-        position.z = -10.0f;
-        velocity.z = 0.0f;
-
-    }
-
-    //Additional floor check
-    Ray gravRay = { (position + Vector3UnitZ * playerHeight), Vector3UnitZ * -1 };
-    SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, playerSize);
-    if (gravCollision.hit && (gravCollision.distance <= playerHeight + 0.001)) {
+    velocity.x = velocityXY.x;
+    velocity.y = velocityXY.y;
+    
+    //Gravity and grav.collision
+    float movementZ = velocity.z * d;
+    vec3 gravRayDir = { 0,0,(velocity.z==0?-1:velocity.z) };
+    Ray gravRay = { (position), Vector3Normalize({0,0,velocity.z }) };
+    SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
+    if ((gravCollision.hit && (gravCollision.distance <= abs(movementZ) + 0.03 )) || gravCollision.initialHit) {
         position = gravCollision.point;
-        if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= floorAngle) {
+        if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= FLOOR_ANGLE) {
             velocity.z = 0.0f;
             isGrounded = true;
         } else {
             isGrounded = false;
-            //velocity = VectorPlaneProject(velocity, gravCollision.normal);
+            velocity = VectorPlaneProject(velocity, gravCollision.normal);
         }
     } else {
         isGrounded = false;
+        position += Vector3UnitZ * movementZ;
+    }
+
+    velocity.z -= GRAVITY * d;
+
+    //Inputs
+    Vector3 front = { cos(lookRotation.x), sin(lookRotation.x), 0.f };
+    Vector3 right = { sin(-lookRotation.x), cos(-lookRotation.x), 0.f };
+
+    Vector3 desiredDir = (front * input.y) + (right * input.x);
+
+    //Drag/friction
+    velocity = velocity * (isGrounded ? FRICTION : AIR_DRAG);
+
+    //Accel calc
+    float accel = WALK_ACCEL * (isGrounded ? 1 : AIR_CONTROL) * d;
+    vec3 velChange = desiredDir * accel;
+    velocity += velChange;
+    if (isGrounded) {
+        velocity = Vector3ClampValue(velocity, 0, crouching ? CROUCH_SPEED : WALK_SPEED);
+    }
+    
+
+    if (isGrounded && jumpPressed) {
+      velocity.z = JUMP_FORCE;
+      isGrounded = false;
+      std::cout << "JUMP" << std::endl;
     }
     
     UpdateCameraPos();
@@ -187,7 +183,7 @@ void PlayerFP::UpdateCameraPos() {
     camera.position = {
             position.x,
             position.y,
-            position.z + (BOTTOM_HEIGHT + headLerp),
+            position.z + (GetCurrentPlayerHeight() + headLerp),
     };
 }
 

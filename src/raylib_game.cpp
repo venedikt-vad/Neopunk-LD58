@@ -156,7 +156,7 @@ int main(void) {
     em2 = new Emitter<Particle>(pt2, { 48,6,1.5 }, { 1,0,0 }, true, 256);
     em2->cone_radius = 360;
     em2->spawnVolumeSize = { 30,30,3 };
-    em2->spawn_period = 0.1;
+    em2->spawn_period = 0.1f;
     em2->spawn_count = 15;
     em2->initial_velocity = 2;
 
@@ -235,9 +235,9 @@ static void UpdateGame(void) {
             door1->Draw(mat);
 
             Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
-            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1);
-            DrawSphere(gravRay.position, .1, Color{ 230, 41, 55, 255 });
-            DrawSphere(gravCollision.point, .1, Color{ 0, 231, 55, 255 });
+            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);
+            DrawSphere(gravRay.position, .1f, Color{ 230, 41, 55, 255 });
+            DrawSphere(gravCollision.point, .1f, Color{ 0, 231, 55, 255 });
 
 
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
@@ -250,8 +250,8 @@ static void UpdateGame(void) {
 
         DrawFPS(10, 10);
         Ray camRay = player->CameraRay();
-        DrawText(Vec3ToString(camRay.position).c_str(), 10, 50, 30, RED);
-        DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, YELLOW);
+        DrawText(Vec3ToString(player->position).c_str(), 10, 50, 30, RED);
+        DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, player->isGrounded?YELLOW:SKYBLUE);
     }
     EndDrawing();
     //----------------------------------------------------------------------------------
