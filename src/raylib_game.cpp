@@ -162,7 +162,7 @@ int main(void) {
 
     //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
     //em1->spawn_count = 20;
-    Transform doorTransform = { { 23.f, 9.f, 2.f }, QuaternionIdentity(), {1,6,2}};
+    Transform doorTransform = { { 23.f, 9.f, 3.f }, QuaternionIdentity(), {1,6,2}};
 
     door1 = new SimpleDoor(doorTransform, cMngr);
 
