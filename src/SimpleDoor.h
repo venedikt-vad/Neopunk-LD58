@@ -9,6 +9,7 @@ public:
 	SimpleDoor (Transform DoorTransform, CollisionManager* collisionManageg);
 	~SimpleDoor ();
 
+
 	void Update(float dt);
 	void Draw(Material m);
 

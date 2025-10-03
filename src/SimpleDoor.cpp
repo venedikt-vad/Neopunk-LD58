@@ -1,9 +1,9 @@
 #include "SimpleDoor.h"
 
-SimpleDoor::SimpleDoor(Transform DoorTransform, CollisionManager* collisionManageg) {
+SimpleDoor::SimpleDoor(Transform doorTransform, CollisionManager* collisionManageg) {
 	cMngr = collisionManageg;
-	colliderIndex = cMngr->AddDynamicBox(DoorTransform);
-	t = DoorTransform;
+	colliderIndex = cMngr->AddDynamicBox(doorTransform);
+	t = doorTransform;
 }
 
 SimpleDoor ::~SimpleDoor() {
