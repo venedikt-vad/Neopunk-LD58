@@ -44,6 +44,8 @@ public:
     void Enable(int id, LM_Enabled mode) { lights[id].enabled = mode; }
     void Disable(int id) { lights[id].enabled = LM_OFF; }
 
+    int Count() { return lights.size(); }
+
 private:
     struct SlotLocs {
         int enabled=-1, type=-1, position=-1, direction=-1, color=-1, radius=-1, angle=-1, intensity=-1;

@@ -11,10 +11,6 @@ namespace VLV {
 		return objectTransform;
 	}
 
-	Transform Object::GetTransform() {
-		return objectTransform;
-	}
-
 	Vector3 Object::GetPosition() {
 		return objectTransform.translation;
 	}

@@ -3,6 +3,7 @@
 #include "raymath.h"
 #include "VVADExtras.h"
 #include "Collision\CollisionManager.h"
+#include "Sound/MultiInstrument.h"
 
 // Movement constants
 #define GRAVITY         32.0f
@@ -78,5 +79,7 @@ namespace VLV {
         PlayerFP(PlayerFP const&) = delete;
 
         PlayerFP& operator= (PlayerFP const&) = delete;
+
+        MultiInstrument* runSound;
     };
 }

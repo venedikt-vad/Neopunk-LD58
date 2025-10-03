@@ -3,19 +3,26 @@
 #include "raymath.h"
 #include "VVADExtras.h"
 #include "Collision\CollisionManager.h"
+#include "Sound\Sound3d.h"
+#include "PlayerFP.h"
 
-class SimpleDoor {
-public:
-	SimpleDoor (Transform DoorTransform, CollisionManager* collisionManager);
-	~SimpleDoor ();
+namespace VLV
+{
+	class SimpleDoor
+	{
+	public:
+		SimpleDoor(Transform DoorTransform, CollisionManager *collisionManager);
+		~SimpleDoor();
 
+		void Update(float dt);
+		void Draw(Material m);
 
-	void Update(float dt);
-	void Draw(Material m);
+	private:
+		CollisionManager *cMngr;
+		CollisionBox collider;
+		Transform t;
+		Sound3d *sound;
 
-private:
-	CollisionManager* cMngr;
-	CollisionBox collider;
-	Transform t;
-
-};
+		PlayerFP &playerInstance = PlayerFP::Instance();
+	};
+}
