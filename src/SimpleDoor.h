@@ -6,7 +6,7 @@
 
 class SimpleDoor {
 public:
-	SimpleDoor (Transform DoorTransform, CollisionManager* collisionManageg);
+	SimpleDoor (Transform DoorTransform, CollisionManager* collisionManager);
 	~SimpleDoor ();
 
 
@@ -15,7 +15,7 @@ public:
 
 private:
 	CollisionManager* cMngr;
-	int colliderIndex;
+	CollisionBox collider;
 	Transform t;
 
 };

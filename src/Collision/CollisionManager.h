@@ -4,24 +4,32 @@
 #include <algorithm>
 #include "VVADExtras.h"
 
+struct CollisionBox {
+	Transform transform;
+	bool isPendingRemove;
+};
+
 class CollisionManager {
 public:
+	CollisionManager();
 	CollisionManager (Mesh MapCollision, Transform MapTransform);
 	~CollisionManager ();
+
+	void SetMapCollision(Mesh MapCollision, Transform MapTransform);
 
 	RayCollision GetRayCollision(Ray ray, bool skipDynamicBoxes = false);
 
 	SphereTraceCollision GetSphereCollision(Ray ray, float sphereRadius, bool skipDynamicBoxes = false);
 
-	int AddDynamicBox(Transform transform);
-	void UpdateDynamicBox(int index, Transform transform);
+	void AddDynamicBox(CollisionBox* box);
 
-	void DrawBox(int index, Material m);
+	void DrawBox(CollisionBox* box, Material m);
 
 	Mesh MapStaticMesh;
 	Mesh UnitBoxMesh;
 private:
 	Matrix MapMeshTransform;
-	std::vector<Matrix> DynamicBoxes;
+	std::vector<CollisionBox*> DynamicBoxes;
 };
 
+CollisionBox NewCollider(Transform t);

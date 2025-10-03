@@ -19,8 +19,7 @@ namespace VLV {
         return pFP;
     }
 
-    PlayerFP& PlayerFP::Instance(Vector3 loc)
-    {
+    PlayerFP& PlayerFP::Instance(Vector3 loc) {
         static PlayerFP pFP;
         return pFP;
     }

@@ -2,8 +2,7 @@
 
 //#define DEBUG_PARTICLES
 
-Particle::Particle()
-{
+Particle::Particle() {
 }
 
 Particle::Particle(vec3 loc, vec3 velocity, ParticleParams* params) {
@@ -13,7 +12,7 @@ Particle::Particle(vec3 loc, vec3 velocity, ParticleParams* params) {
 	spawnTime = GetTime();
 }
 
-Particle::~Particle(){
+Particle::~Particle() {
 }
 
 void Particle::Draw(Camera cam) {

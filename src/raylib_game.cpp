@@ -30,6 +30,8 @@
 #include "SimpleDoor.h"
 
 #include <rlgl.h>
+
+using namespace VLV;
 //----------------------------------------------------------------------------------
 // Shared Variables Definition (global)
 //----------------------------------------------------------------------------------
@@ -49,7 +51,6 @@ CollisionManager* cMngr = nullptr;
 Texture2D texture;
 Material mat;
 
-PlayerFP* player = nullptr;
 SimpleDoor* door1 = nullptr;
 
 Emitter<Particle>* em1;
@@ -79,8 +80,6 @@ int main(void) {
     //SetMusicVolume(music, 1.0f);
     //PlayMusicStream(music);
 
-    player = new PlayerFP();
-
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
     
@@ -95,6 +94,7 @@ int main(void) {
     modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
 
     Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
+    
     cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
 
     mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
@@ -196,14 +196,15 @@ bool freezeLightCooling = false;
 
 // Update and draw game frame
 static void UpdateGame(void) {
+    PlayerFP& player = PlayerFP::Instance();
+
     float d = GetFrameTime();
     // Update
     //----------------------------------------------------------------------------------
     //UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
-    if (!player)return;
-    player->Update(d, cMngr);
+    player.Update(d, cMngr);
 
-    SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player->camera.position, SHADER_UNIFORM_VEC3);
+    SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player.camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
@@ -217,7 +218,7 @@ static void UpdateGame(void) {
     LM_Light& edit = gLightMgr->Get(0);
     edit.angle = fmodf((float)GetTime(), 1.0f) * 45.f;
 
-    if(!freezeLightCooling)gLightMgr->SyncToGPU(player->camera);
+    if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
     //UpdateLightsArray(sh1, lights, player->camera);
 
     // Draw
@@ -225,19 +226,19 @@ static void UpdateGame(void) {
     BeginDrawing(); {
         ClearBackground(BLACK);
         
-        BeginMode3D(player->camera);
+        BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
-            em1->Draw(player->camera);
+            em1->Draw(player.camera);
 
-            em2->Draw(player->camera);
+            em2->Draw(player.camera);
 
             door1->Draw(mat);
 
-            Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
+            /*Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
             SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);
             DrawSphere(gravRay.position, .1f, Color{ 230, 41, 55, 255 });
-            DrawSphere(gravCollision.point, .1f, Color{ 0, 231, 55, 255 });
+            DrawSphere(gravCollision.point, .1f, Color{ 0, 231, 55, 255 });*/
 
 
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
@@ -249,9 +250,9 @@ static void UpdateGame(void) {
         EndMode3D();
 
         DrawFPS(10, 10);
-        Ray camRay = player->CameraRay();
-        DrawText(Vec3ToString(player->position).c_str(), 10, 50, 30, RED);
-        DrawText(Vec3ToString(player->velocity).c_str(), 10, 80, 30, player->isGrounded?YELLOW:SKYBLUE);
+        Ray camRay = player.CameraRay();
+        DrawText(Vec3ToString(player.position).c_str(), 10, 50, 30, RED);
+        DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

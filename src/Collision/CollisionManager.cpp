@@ -1,4 +1,8 @@
 #include "CollisionManager.h"
+#include "CollisionManager.h"
+
+CollisionManager::CollisionManager() {
+}
 
 CollisionManager::CollisionManager(Mesh MapCollision, Transform MapTransform) {
 	MapStaticMesh = MapCollision;
@@ -12,11 +16,20 @@ CollisionManager ::~CollisionManager() {
 
 }
 
+void CollisionManager::SetMapCollision(Mesh MapCollision, Transform MapTransform) {
+	MapStaticMesh = MapCollision;
+	MapMeshTransform = TransformToMatrix(MapTransform);
+}
+
 RayCollision CollisionManager::GetRayCollision(Ray ray, bool skipDynamicBoxes) {
 	RayCollision mapCollisionData = GetRayCollisionMesh(ray, MapStaticMesh, MapMeshTransform);
 	if(skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
-		RayCollision boxCollisionData = GetRayCollisionMesh(ray, UnitBoxMesh, DynamicBoxes[i]);
+		if (DynamicBoxes[i]->isPendingRemove) {
+			DynamicBoxes.erase(DynamicBoxes.begin()+i);
+			i--;
+		}
+		RayCollision boxCollisionData = GetRayCollisionMesh(ray, UnitBoxMesh, TransformToMatrix(DynamicBoxes[i]->transform));
 		if (boxCollisionData.hit && ((boxCollisionData.distance < mapCollisionData.distance) || !mapCollisionData.hit)) mapCollisionData = boxCollisionData;
 	}
 	return mapCollisionData;
@@ -26,24 +39,26 @@ SphereTraceCollision CollisionManager::GetSphereCollision(Ray ray, float sphereR
 	SphereTraceCollision mapCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, MapStaticMesh, MapMeshTransform);
 	if (skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
-		SphereTraceCollision boxCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, UnitBoxMesh, DynamicBoxes[i]);
+		if (DynamicBoxes[i]->isPendingRemove) {
+			DynamicBoxes.erase(DynamicBoxes.begin() + i);
+			i--;
+		}
+		SphereTraceCollision boxCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, UnitBoxMesh, TransformToMatrix(DynamicBoxes[i]->transform));
 		if (boxCollisionData.hit && ((boxCollisionData.distance < mapCollisionData.distance) || !mapCollisionData.hit)) mapCollisionData = boxCollisionData;
 	}
 	return mapCollisionData;
 }
 
-
-
-int CollisionManager::AddDynamicBox(Transform transform) {
-	DynamicBoxes.push_back(TransformToMatrix(transform));
-	return  DynamicBoxes.size()-1;
+void CollisionManager::AddDynamicBox(CollisionBox* box) {
+	DynamicBoxes.push_back(box);
 }
 
-void CollisionManager::UpdateDynamicBox(int index, Transform transform) {
-	if (DynamicBoxes.size() <= index)return;
-	DynamicBoxes[index] = (TransformToMatrix(transform));
+
+void CollisionManager::DrawBox(CollisionBox* box, Material m) {
+
+	DrawMesh(UnitBoxMesh, m, TransformToMatrix(box->transform));
 }
 
-void CollisionManager::DrawBox(int index, Material m) {
-	DrawMesh(UnitBoxMesh, m, DynamicBoxes[index]);
+CollisionBox NewCollider(Transform t) {
+	return { t, false };
 }

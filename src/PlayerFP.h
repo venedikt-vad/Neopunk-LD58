@@ -70,10 +70,10 @@ namespace VLV {
 
         Ray CameraRay();
     private:
-        PlayerFP() {}
+        PlayerFP();
         PlayerFP(Vector3 loc);
 
-        ~PlayerFP() {}
+        ~PlayerFP() {};
 
         PlayerFP(PlayerFP const&) = delete;
 
