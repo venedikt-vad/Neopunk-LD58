@@ -370,6 +370,7 @@
     <ClCompile Include="..\..\..\src\SimpleDoor.cpp" />
     <ClCompile Include="..\..\..\src\Sound\MultiInstrument.cpp" />
     <ClCompile Include="..\..\..\src\Sound\Sound3d.cpp" />
+    <ClCompile Include="..\..\..\src\Sound\SoundEffects.cpp" />
     <ClCompile Include="..\..\..\src\VVADExtras.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -387,6 +388,7 @@
     <ClInclude Include="..\..\..\src\SimpleDoor.h" />
     <ClInclude Include="..\..\..\src\Sound\MultiInstrument.h" />
     <ClInclude Include="..\..\..\src\Sound\Sound3d.h" />
+    <ClInclude Include="..\..\..\src\Sound\SoundEffects.h" />
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

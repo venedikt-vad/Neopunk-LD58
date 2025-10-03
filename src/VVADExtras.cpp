@@ -5,12 +5,11 @@ const Ray GetCameraRay(Camera cam) {
 }
 
 const vec3 GetCameraUp(Camera cam) {
-    return Vector3CrossProduct(GetCameraRight(cam), cam.target - cam.position);
+    return Vector3Normalize(Vector3CrossProduct(GetCameraRight(cam), cam.target - cam.position));
 }
 
 const vec3 GetCameraRight(Camera cam) {
-
-    return Vector3CrossProduct(cam.target - cam.position, cam.up);
+    return Vector3Normalize(Vector3CrossProduct(cam.target - cam.position, cam.up));
 }
 
 

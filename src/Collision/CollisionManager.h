@@ -10,9 +10,15 @@ struct CollisionBox {
 };
 
 class CollisionManager {
-public:
+private:
+	static CollisionManager* instance;
+	CollisionManager(Mesh MapCollision, Transform MapTransform);
 	CollisionManager();
-	CollisionManager (Mesh MapCollision, Transform MapTransform);
+public:
+	
+	static CollisionManager& Instance();
+	static CollisionManager& Instance(Mesh MapCollision, Transform MapTransform);
+
 	~CollisionManager ();
 
 	void SetMapCollision(Mesh MapCollision, Transform MapTransform);

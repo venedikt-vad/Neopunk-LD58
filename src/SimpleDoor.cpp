@@ -2,11 +2,11 @@
 
 using namespace VLV;
 
-SimpleDoor::SimpleDoor(Transform doorTransform, CollisionManager* collisionManager) {
+SimpleDoor::SimpleDoor(Transform doorTransform) {
 	collider = NewCollider(doorTransform);
-	collisionManager->AddDynamicBox(&collider);
+	CollisionManager& cMngr = CollisionManager::Instance();
+	cMngr.AddDynamicBox(&collider);
 	t = doorTransform;
-	cMngr = collisionManager;
 	sound = new Sound3d("resources/sounds/openTheDoor.mp3");
 	sound->Play();
 }
@@ -20,7 +20,7 @@ SimpleDoor::~SimpleDoor() {
 
 void SimpleDoor::Update(float dt) {
 	Transform newT = t;
-	newT.translation.z += (sin(GetTime() / 2) + 1);
+	newT.translation.z += (float)(sin(GetTime() / 2.f) + 1.f);
 	collider.transform = newT;
 	// if (!sound->IsPlayingSound()) {
 	// 	sound->Play();
@@ -29,5 +29,6 @@ void SimpleDoor::Update(float dt) {
 }
 
 void SimpleDoor::Draw(Material m) {
-	cMngr->DrawBox(&collider, m);
+	CollisionManager& cMngr = CollisionManager::Instance();
+	cMngr.DrawBox(&collider, m);
 }

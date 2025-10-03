@@ -26,6 +26,9 @@
     <ClCompile Include="..\..\..\src\Sound\Sound3d.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\Sound\SoundEffects.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -56,6 +59,9 @@
       <Filter>Sound</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\Sound\Sound3d.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Sound\SoundEffects.h">
       <Filter>Sound</Filter>
     </ClInclude>
   </ItemGroup>

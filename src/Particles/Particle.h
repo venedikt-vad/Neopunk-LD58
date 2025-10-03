@@ -32,7 +32,7 @@ public:
 
 	void Draw(Camera cam);
 
-	void Update(float deltaTime, CollisionManager* cMngr);
+	void Update(float deltaTime);
 
 	bool pendingDestroy = false;
 private:

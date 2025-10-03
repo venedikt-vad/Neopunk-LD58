@@ -11,14 +11,13 @@ namespace VLV
 	class SimpleDoor
 	{
 	public:
-		SimpleDoor(Transform DoorTransform, CollisionManager *collisionManager);
+		SimpleDoor(Transform DoorTransform);
 		~SimpleDoor();
 
 		void Update(float dt);
 		void Draw(Material m);
 
 	private:
-		CollisionManager *cMngr;
 		CollisionBox collider;
 		Transform t;
 		Sound3d *sound;

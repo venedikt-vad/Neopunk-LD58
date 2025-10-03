@@ -45,7 +45,6 @@ Matrix mapMatrix;
 
 Shader sh1;
 LightManager* gLightMgr = nullptr;
-CollisionManager* cMngr = nullptr;
 
 
 Texture2D texture;
@@ -95,7 +94,9 @@ int main(void) {
 
     Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
     
-    cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
+    CollisionManager& cMngr = CollisionManager::Instance(modelMap.meshes[0], mapTransform);
+
+    //cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
 
     mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
     // Ambient light level (some basic lighting)
@@ -164,7 +165,7 @@ int main(void) {
     //em1->spawn_count = 20;
     Transform doorTransform = { { 23.f, 9.f, 3.f }, QuaternionIdentity(), {1,6,2}};
 
-    door1 = new SimpleDoor(doorTransform, cMngr);
+    door1 = new SimpleDoor(doorTransform);
 
     
 
@@ -197,20 +198,22 @@ bool freezeLightCooling = false;
 // Update and draw game frame
 static void UpdateGame(void) {
     PlayerFP& player = PlayerFP::Instance();
+    CollisionManager& cMngr = CollisionManager::Instance();
+
 
     float d = GetFrameTime();
     // Update
     //----------------------------------------------------------------------------------
     //UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
-    player.Update(d, cMngr);
+    player.Update(d);
 
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player.camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
-    em1->Update(d, cMngr);
-    em2->Update(d, cMngr);
+    em1->Update(d);
+    em2->Update(d);
 
     door1->Update(d);
     //lights[0].position = player->camera.position;

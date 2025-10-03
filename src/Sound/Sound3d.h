@@ -5,6 +5,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include "SoundEffects.h"
+
 class Sound3d {
 public:
     Sound3d();
@@ -22,4 +24,6 @@ public:
 
 private:
     Sound sound;
+
+    bool LPFAttached = false;
 };

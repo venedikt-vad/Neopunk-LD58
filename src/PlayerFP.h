@@ -62,7 +62,7 @@ namespace VLV {
 
         void Init(Vector3 loc);
 
-        void Update(float d, CollisionManager* cMngr);
+        void Update(float d);
 
         void UpdateCameraPos();
         void UpdateCameraFPS(Camera* camera);

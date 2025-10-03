@@ -1,7 +1,21 @@
 #include "CollisionManager.h"
-#include "CollisionManager.h"
 
-CollisionManager::CollisionManager() {
+CollisionManager* CollisionManager::instance = nullptr;
+
+// Static method to get instance with default location
+CollisionManager& CollisionManager::Instance() {
+	if (instance == nullptr) {
+		instance = new CollisionManager(); // Default location
+	}
+	return *instance;
+}
+
+// Static method to get instance with custom location (only works once)
+CollisionManager& CollisionManager::Instance(Mesh MapCollision, Transform MapTransform) {
+	if (instance == nullptr) {
+		instance = new CollisionManager( MapCollision, MapTransform);
+	}
+	return *instance;
 }
 
 CollisionManager::CollisionManager(Mesh MapCollision, Transform MapTransform) {
@@ -11,6 +25,8 @@ CollisionManager::CollisionManager(Mesh MapCollision, Transform MapTransform) {
 	Model boxModel = LoadModel("resources/UnitCube.obj");
 	UnitBoxMesh = boxModel.meshes[0];
 }
+
+CollisionManager::CollisionManager(){}
 
 CollisionManager ::~CollisionManager() {
 

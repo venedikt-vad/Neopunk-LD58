@@ -47,7 +47,7 @@ public:
 		}
 	};
 
-	void Update(float deltaTime, CollisionManager* cMngr) {
+	void Update(float deltaTime) {
 		if (active) {
 			if ((GetTime() - last_spawn_t >= spawn_period) && (particles.size() < max_particles)) {
 				SpawnParticles();
@@ -67,7 +67,7 @@ public:
 #pragma omp parallel for schedule(static)
 		for (int i = 0; i < (int)particles.size(); ++i) {
 			ParticleType* pt = particles[i];
-			if (pt) pt->Update(deltaTime, cMngr);
+			if (pt) pt->Update(deltaTime);
 		}
 
 		// 3) Single-threaded compaction + deletion of dead particles

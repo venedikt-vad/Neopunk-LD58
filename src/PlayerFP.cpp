@@ -53,8 +53,9 @@ namespace VLV
         DisableCursor();
     }
 
-    void PlayerFP::Update(float d, CollisionManager *cMngr)
-    {
+    void PlayerFP::Update(float d){
+
+        CollisionManager& cMngr = CollisionManager::Instance();
 
         // Inputs
         Vector2 mouseDelta = GetMouseDelta();
@@ -106,8 +107,8 @@ namespace VLV
             Ray moveRayHead = {(position + (Vector3UnitZ * (headOffset + PLAYER_HEAD_SPACE))), Vector3Normalize(movementVector)};
             Ray moveRayCenter = {(position + Vector3UnitZ * (playerHeight / 2)), Vector3Normalize(movementVector)};
             // Ray moveRayBottom = { (position), Vector3Normalize(movementVector) };
-            SphereTraceCollision collisionDataHead = cMngr->GetSphereCollision(moveRayHead, PLAYER_RADIUS);
-            SphereTraceCollision collisionData = cMngr->GetSphereCollision(moveRayCenter, PLAYER_RADIUS);
+            SphereTraceCollision collisionDataHead = cMngr.GetSphereCollision(moveRayHead, PLAYER_RADIUS);
+            SphereTraceCollision collisionData = cMngr.GetSphereCollision(moveRayCenter, PLAYER_RADIUS);
 
             // bool foundCollision = false;
             /*if (collisionData.hit && collisionData.distance <= Vector3Length(movementVector)) {
@@ -179,7 +180,7 @@ namespace VLV
         {
             // Fall
             Ray gravRay = {(position + (Vector3UnitZ * (headOffset + PLAYER_HEAD_SPACE))), gravRayDir};
-            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
+            SphereTraceCollision gravCollision = cMngr.GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
             if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ) + headOffset + PLAYER_HEAD_SPACE + 0.03))) || gravCollision.initialHit)
             {
                 position = gravCollision.point;
@@ -205,7 +206,7 @@ namespace VLV
         {
             // Jump
             Ray gravRay = {(position + (Vector3UnitZ * .1f)), gravRayDir};
-            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
+            SphereTraceCollision gravCollision = cMngr.GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
             if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ) + headOffset + PLAYER_HEAD_SPACE))) || gravCollision.initialHit)
             {
                 velocity = VectorPlaneProject(velocity, gravCollision.normal);
