@@ -18,6 +18,14 @@
     <ClCompile Include="..\..\..\src\SimpleDoor.cpp">
       <Filter>SimpleDoor</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\Object.cpp" />
+    <ClCompile Include="..\..\..\src\ObjectManager.cpp" />
+    <ClCompile Include="..\..\..\src\Sound\MultiInstrument.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Sound\Sound3d.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -42,6 +50,14 @@
     <ClInclude Include="..\..\..\src\SimpleDoor.h">
       <Filter>SimpleDoor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\Object.h" />
+    <ClInclude Include="..\..\..\src\ObjectManager.h" />
+    <ClInclude Include="..\..\..\src\Sound\MultiInstrument.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Sound\Sound3d.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
@@ -61,6 +77,9 @@
     </Filter>
     <Filter Include="SimpleDoor">
       <UniqueIdentifier>{b595922a-3b6b-4624-bf63-ac4465d4b665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{f8c46894-befb-4d6d-a516-f9ac9f2330d3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

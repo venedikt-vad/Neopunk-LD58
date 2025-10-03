@@ -1,10 +1,12 @@
 #include "Object.h"
 
-namespace VLV {
-
-	Object::Object()
-	{
+	Object::Object() {
 		objectTransform = { 0 };
+		objectIndex = 0;
+	}
+
+	Object::~Object()
+	{
 	}
 
 	Transform Object::GetTransform() {
@@ -27,7 +29,7 @@ namespace VLV {
 		return objectIndex;
 	}
 
-	void SetTranfarm() {
-
+	void Object::SetTranfarm()
+	{
 	}
-}
+

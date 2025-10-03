@@ -3,9 +3,7 @@
 #include "Object.h"
 #include <vector>
 #include <string>
-#include "Collision\CollisionManager.h"
 
-namespace VLV {
 	class ObjectManager {
 	public:
 
@@ -31,4 +29,3 @@ namespace VLV {
 
 
 	};
-}

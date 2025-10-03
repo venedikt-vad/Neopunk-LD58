@@ -1,19 +1,15 @@
 #include "ObjectManager.h"
 
-namespace VLV {
-	void Append()
-	{
+void ObjectManager::Append()
+{
+}
 
-	}
+void ObjectManager::Delete()
+{
+}
 
-	void Delete()
-	{
-
-	}
-
-	ObjectManager& ObjectManager::Instance()
+ObjectManager& ObjectManager::Instance()
 	{
 		static ObjectManager oM;
 		return oM;
 	}
-}

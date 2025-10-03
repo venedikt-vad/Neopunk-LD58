@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "raymath.h"
 
-namespace VLV {
 	class Object {
 	public:
 		Object();
@@ -21,11 +20,11 @@ namespace VLV {
 
 		void SetTranfarm();
 
-		virtual void Update(float dt);
+		virtual void Update(float dt) {};
 
-		virtual void DrawObject();
+		virtual void DrawObject() {};
 
-		virtual void HideObject();
+		virtual void HideObject() {};
 
 	protected:
 
@@ -33,4 +32,3 @@ namespace VLV {
 
 		int objectIndex;
 	};
-}
