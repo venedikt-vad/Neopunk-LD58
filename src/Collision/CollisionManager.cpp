@@ -17,7 +17,7 @@ RayCollision CollisionManager::GetRayCollision(Ray ray, bool skipDynamicBoxes) {
 	if(skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
 		RayCollision boxCollisionData = GetRayCollisionMesh(ray, UnitBoxMesh, DynamicBoxes[i]);
-		if (boxCollisionData.hit && (boxCollisionData.distance < mapCollisionData.distance)) mapCollisionData = boxCollisionData;
+		if (boxCollisionData.hit && ((boxCollisionData.distance < mapCollisionData.distance) || !mapCollisionData.hit)) mapCollisionData = boxCollisionData;
 	}
 	return mapCollisionData;
 }
@@ -27,7 +27,7 @@ SphereTraceCollision CollisionManager::GetSphereCollision(Ray ray, float sphereR
 	if (skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
 		SphereTraceCollision boxCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, UnitBoxMesh, DynamicBoxes[i]);
-		if (boxCollisionData.hit && (boxCollisionData.distance < mapCollisionData.distance)) mapCollisionData = boxCollisionData;
+		if (boxCollisionData.hit && ((boxCollisionData.distance < mapCollisionData.distance) || !mapCollisionData.hit)) mapCollisionData = boxCollisionData;
 	}
 	return mapCollisionData;
 }

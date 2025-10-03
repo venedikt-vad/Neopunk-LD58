@@ -1,7 +1,7 @@
 #include "PlayerFP.h"
 #include <iostream>
 
-//#define NORMALIZE_INPUT
+#define NORMALIZE_INPUT
 
 PlayerFP::PlayerFP() {
     Init({0,0,0.029});
@@ -132,27 +132,36 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
     
     //Gravity and grav.collision
     float movementZ = velocity.z * d;
-    vec3 gravRayDir = { 0,0,(velocity.z==0?-1:velocity.z) };
-    float gravCheckOffset = (velocity.z < 0) ? (headOffset+PLAYER_HEAD_SPACE) : 0;
-    Ray gravRay = { (position+(Vector3UnitZ* gravCheckOffset)), Vector3Normalize({0,0,velocity.z }) };
-    SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
-    if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ)+ gravCheckOffset + 0.03) )) || gravCollision.initialHit) {
-        if (velocity.z > 0) {
-            position = gravCollision.point - (Vector3UnitZ * gravCheckOffset);
-        } else {
-            position = gravCollision.point;
-        }
+    vec3 gravRayDir = Vector3Normalize({ 0,0,(velocity.z==0?-1:velocity.z) });
 
-        if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= FLOOR_ANGLE) {
-            velocity.z = 0.0f;
-            isGrounded = true;
+    if (movementZ <= 0) {
+        //Fall
+        Ray gravRay = { (position + (Vector3UnitZ * (headOffset + PLAYER_HEAD_SPACE))), gravRayDir };
+        SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
+        if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ) + headOffset + PLAYER_HEAD_SPACE + 0.03))) || gravCollision.initialHit) {
+            position = gravCollision.point;
+
+            if (Vector3DotProduct(gravCollision.normal, Vector3UnitZ) >= FLOOR_ANGLE) {
+                velocity.z = 0.0f;
+                isGrounded = true;
+            } else {
+                isGrounded = false;
+                velocity = VectorPlaneProject(velocity, gravCollision.normal);
+            }
         } else {
             isGrounded = false;
-            velocity = VectorPlaneProject(velocity, gravCollision.normal);
+            position += Vector3UnitZ * movementZ;
         }
+
     } else {
-        isGrounded = false;
-        position += Vector3UnitZ * movementZ;
+        //Jump
+        Ray gravRay = { (position + (Vector3UnitZ *.1f)), gravRayDir };
+        SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, PLAYER_RADIUS - 0.01);
+        if ((gravCollision.hit && (gravCollision.distance <= (abs(movementZ) + headOffset + PLAYER_HEAD_SPACE))) || gravCollision.initialHit) {
+            velocity = VectorPlaneProject(velocity, gravCollision.normal);
+        } else {
+            position += Vector3UnitZ * movementZ;
+        }
     }
 
     velocity.z -= GRAVITY * d;
@@ -173,8 +182,6 @@ void PlayerFP::Update(float d, CollisionManager* cMngr) {
         velChange = Vector3ClampValue(velocity+velChange, 0, crouching ? CROUCH_SPEED : WALK_SPEED)-velocity;
     }
     velocity += velChange;
-
-    
 
     if (isGrounded && jumpPressed) {
       velocity.z = JUMP_FORCE;
