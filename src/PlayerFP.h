@@ -34,39 +34,49 @@
 
 
 #define DEBUG_PLAYER
+namespace VLV {
 
-class PlayerFP {
-public:
-    Camera camera;
+    class PlayerFP {
+    public:
+        Camera camera;
 
-    Vector3 position;
-    Vector3 velocity;
-    Vector3 dir;
-    bool isGrounded;
+        Vector3 position;
+        Vector3 velocity;
+        Vector3 dir;
+        bool isGrounded;
 
-    Vector2 lookRotation = { 0.f,0.f };
-    Vector2 lean = { 0 };
-    float headTimer = 0.0f;
-    float walkLerp = 0.0f;
-    float headLerp = STAND_HEIGHT;
+        Vector2 lookRotation = { 0.f,0.f };
+        Vector2 lean = { 0 };
+        float headTimer = 0.0f;
+        float walkLerp = 0.0f;
+        float headLerp = STAND_HEIGHT;
 
-    Vector2 sensitivity = { 0.001f, 0.001f };
+        Vector2 sensitivity = { 0.001f, 0.001f };
 
-    //float playerSize = 0.3f;
-    //float floorAngle = 0.8f;
+        //float playerSize = 0.3f;
+        //float floorAngle = 0.8f;
 
+        static PlayerFP& Instance();
+        static PlayerFP& Instance(Vector3 loc);
 
-    PlayerFP();
-    PlayerFP(Vector3 loc);
-    void Init(Vector3 loc);
+        void Init(Vector3 loc);
 
-    void Update(float d, CollisionManager* cMngr);
+        void Update(float d, CollisionManager* cMngr);
 
-    void UpdateCameraPos();
-    void UpdateCameraFPS(Camera* camera);
+        void UpdateCameraPos();
+        void UpdateCameraFPS(Camera* camera);
 
-    float GetCurrentPlayerHeight();
+        float GetCurrentPlayerHeight();
 
-    Ray CameraRay();
-};
+        Ray CameraRay();
+    private:
+        PlayerFP() {}
+        PlayerFP(Vector3 loc);
 
+        ~PlayerFP() {}
+
+        PlayerFP(PlayerFP const&) = delete;
+
+        PlayerFP& operator= (PlayerFP const&) = delete;
+    };
+}
