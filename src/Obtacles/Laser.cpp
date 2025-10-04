@@ -24,7 +24,7 @@ void Laser::Update(float dt)
 
     Vector3 playerPos = playerInstance.camera.position;
 
-    float dist = 1.f;
+    float dist = 2.f;
 
     sound->SetSoundPosition(playerInstance.camera, ClosestPointOnLine(startPos, endPos, playerInstance.camera.position));
     if (!sound->IsPlayingSound()) {
@@ -34,7 +34,12 @@ void Laser::Update(float dt)
     bool isPlayerCollision = playerPos.x > (startPos.x - dist) && playerPos.x < (endPos.x + dist) &&
                              playerPos.y > (startPos.y - dist) && playerPos.y < (endPos.y + dist) &&
                              playerPos.z > (startPos.z - dist) && playerPos.z < (endPos.z + dist);
-    //TODO hit player;
+
+    if (isPlayerCollision && (GetTime() - lastTime > 1)) {
+        lastTime = GetTime();
+        playerInstance.HaveDamage(15);
+    }
+
 }
 
 void Laser::DrawObject()

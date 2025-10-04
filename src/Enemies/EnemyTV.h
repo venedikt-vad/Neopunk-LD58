@@ -18,4 +18,6 @@ private:
     Model modelTV;
     Sound3d* voidSound;
     Sound3d* voicesSound;
+
+    float lastTime = 0.f;
 };

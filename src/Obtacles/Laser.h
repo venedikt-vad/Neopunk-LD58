@@ -18,5 +18,7 @@ private:
     Vector3 startPos;
     Vector3 endPos;
 
+    float lastTime = 0.f;
+
     Sound3d* sound;
 };

@@ -324,6 +324,7 @@
 
     void PlayerFP::HaveDamage(int damage) {
         hpPlayer -= damage;
+        std::cout << hpPlayer << std::endl;
     }
 
     void PlayerFP::deathPlayer() {

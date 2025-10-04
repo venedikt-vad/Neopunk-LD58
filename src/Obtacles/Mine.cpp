@@ -22,8 +22,8 @@ void Mine::Update(float dt)
     bool isPlayerCollision = Vector3Distance(playerInstance.position, objectTransform.translation) <= maxDist;
     
     if (isPlayerCollision && !isDestroy) {
-        //TODO hit player;
         expSound->Play();
+        playerInstance.HaveDamage(40);
         isDestroy = true;
     }
 

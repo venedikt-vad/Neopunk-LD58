@@ -56,8 +56,6 @@ void EnemyTV::Update(float dt)
         }
         if (!voidSound->IsPlayingSound()) {
             voidSound->Play();
-        } else {
-            voidSound->Resume();
         }
     } else {
         if (voidSound->IsPlayingSound()) {
@@ -66,8 +64,6 @@ void EnemyTV::Update(float dt)
         }
         if (!voicesSound->IsPlayingSound()) {
             voicesSound->Play();
-        } else {
-            voicesSound->Resume();
         }
     }
     voidSound->SetSoundPosition(playerInstance.camera, objectTransform.translation);
@@ -77,6 +73,14 @@ void EnemyTV::Update(float dt)
         {objectTransform.translation + dirNorm * !isLooking * 0.05,
          q,
          objectTransform.scale});
+
+    float maxDist = 2.f;
+    bool isPlayerCollision = Vector3Distance(playerInstance.position, objectTransform.translation) <= maxDist;
+
+        if (isPlayerCollision && (GetTime() - lastTime > 1)) {
+        lastTime = GetTime();
+        playerInstance.HaveDamage(20);
+    }
 }
 
 void EnemyTV::DrawObject()
