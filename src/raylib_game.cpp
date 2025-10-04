@@ -83,9 +83,10 @@ int main(void) {
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
     
 
-    modelMap = LoadModel("resources/TestMap.obj");
+    modelMap = LoadModel("resources/tileEmpty.obj");
+    //LoadMaterials("")
 
-    texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
+    texture = LoadTexture("resources/tex/WorldTextures.png");    // Load map texture
     
     mat = LoadMaterialDefault();
     mat.shader = sh1;
@@ -93,15 +94,20 @@ int main(void) {
     modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
 
     Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
-    
+
     CollisionManager& cMngr = CollisionManager::Instance(modelMap.meshes[0], mapTransform);
 
     //cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
 
     mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
+    
+    PlayerFP& player = PlayerFP::Instance();
+    player.position = { 0,0,1 };
+
+    
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
-    float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    float ambientValues[4] = { 0.3f, 0.4f, 0.4f, 1.0f };
     SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
     gLightMgr = new LightManager(sh1);
     // Create lights

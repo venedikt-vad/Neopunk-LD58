@@ -362,6 +362,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\src\Collision\CollisionManager.cpp" />
     <ClCompile Include="..\..\..\src\Lights\LightManager.cpp" />
+    <ClCompile Include="..\..\..\src\MapGenerator\MapGenerator.cpp" />
     <ClCompile Include="..\..\..\src\Object.cpp" />
     <ClCompile Include="..\..\..\src\ObjectManager.cpp" />
     <ClCompile Include="..\..\..\src\Particles\Particle.cpp" />
@@ -380,6 +381,7 @@
     <ClInclude Include="..\..\..\src\Collision\CollisionManager.h" />
     <ClInclude Include="..\..\..\src\Lights\LightManager.h" />
     <ClInclude Include="..\..\..\src\Lights\rlights.h" />
+    <ClInclude Include="..\..\..\src\MapGenerator\MapGenerator.h" />
     <ClInclude Include="..\..\..\src\Object.h" />
     <ClInclude Include="..\..\..\src\ObjectManager.h" />
     <ClInclude Include="..\..\..\src\Particles\Particle.h" />
