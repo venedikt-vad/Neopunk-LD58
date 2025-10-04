@@ -16,6 +16,16 @@ typedef struct {
     Vector3 contactPoint;   // Point where sphere touches the triangle
 } SphereTraceCollision;
 
+typedef struct {
+    int x;
+    int y;
+} iVec2;
+
+typedef struct {
+    int x;
+    int y;
+    int z;
+} iVec3;
 
 //Gets camera origin and direction
 const Ray GetCameraRay(Camera cam);

@@ -18,10 +18,25 @@ CollisionManager& CollisionManager::Instance(Mesh MapCollision, Transform MapTra
 	return *instance;
 }
 
+CollisionManager& CollisionManager::Instance(MapGenerator* Map) {
+	if (instance == nullptr) {
+		instance = new CollisionManager(Map);
+	}
+	return *instance;
+}
+
 CollisionManager::CollisionManager(Mesh MapCollision, Transform MapTransform) {
 	MapStaticMesh = MapCollision;
 	MapMeshTransform = TransformToMatrix(MapTransform);
 
+	Model boxModel = LoadModel("resources/UnitCube.obj");
+	UnitBoxMesh = boxModel.meshes[0];
+}
+
+CollisionManager::CollisionManager(MapGenerator* Map) {
+	map = Map;
+	MapStaticMesh = { 0 };
+	MapMeshTransform = { 0 };
 	Model boxModel = LoadModel("resources/UnitCube.obj");
 	UnitBoxMesh = boxModel.meshes[0];
 }
@@ -38,7 +53,14 @@ void CollisionManager::SetMapCollision(Mesh MapCollision, Transform MapTransform
 }
 
 RayCollision CollisionManager::GetRayCollision(Ray ray, bool skipDynamicBoxes) {
-	RayCollision mapCollisionData = GetRayCollisionMesh(ray, MapStaticMesh, MapMeshTransform);
+	RayCollision mapCollisionData;
+	if (map) {
+		MeshMatrix m = map->GetMapTileAtLocation(ray.position);
+		mapCollisionData = GetRayCollisionMesh(ray, m.mesh, m.matrix);
+	} else {
+		mapCollisionData = GetRayCollisionMesh(ray, MapStaticMesh, MapMeshTransform);
+	}
+
 	if(skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
 		if (DynamicBoxes[i]->isPendingRemove) {
@@ -52,7 +74,15 @@ RayCollision CollisionManager::GetRayCollision(Ray ray, bool skipDynamicBoxes) {
 }
 
 SphereTraceCollision CollisionManager::GetSphereCollision(Ray ray, float sphereRadius, bool skipDynamicBoxes) {
-	SphereTraceCollision mapCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, MapStaticMesh, MapMeshTransform);
+	SphereTraceCollision mapCollisionData;
+	if (map) {
+		MeshMatrix m = map->GetMapTileAtLocation(ray.position);
+		mapCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, m.mesh, m.matrix);
+	} else {
+		mapCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, MapStaticMesh, MapMeshTransform);
+	}
+
+	//SphereTraceCollision mapCollisionData = GetSphereTraceCollisionMesh(ray, sphereRadius, MapStaticMesh, MapMeshTransform);
 	if (skipDynamicBoxes) return mapCollisionData;
 	for (size_t i = 0; i < DynamicBoxes.size(); i++) {
 		if (DynamicBoxes[i]->isPendingRemove) {
