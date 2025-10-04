@@ -69,6 +69,11 @@ class PlayerFP {
         float GetCurrentPlayerHeight();
 
         Ray CameraRay();
+
+        int invetoryWeight;
+
+        void AddObjToInventory(int i);
+
     private:
         PlayerFP();
         PlayerFP(Vector3 loc);

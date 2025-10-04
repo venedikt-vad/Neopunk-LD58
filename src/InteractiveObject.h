@@ -5,7 +5,7 @@
 #include "PlayerFP.h"
 
 //Class of the interaction object, when located nearby
-class InteractiveObject : Object {
+class InteractiveObject : public Object {
 public:
 	void Interactive();
 
@@ -13,6 +13,10 @@ public:
 	virtual void ResultInteract();
 
 	void Update(float dt) override;
+
+	void DrawObject() override;
+
+	void HideObject() override;
 
 	InteractiveObject();
 
@@ -26,4 +30,9 @@ protected:
 	Ray rayCameraPlayer;
 	float rangeToObject;
 
+	Model objModel;
+	Texture2D texture;
+	Material mat;
+	
+	Matrix objMatrix;
 };

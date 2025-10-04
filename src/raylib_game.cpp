@@ -29,6 +29,10 @@
 #include "PlayerFP.h"
 #include "SimpleDoor.h"
 
+#include "Object.h"
+#include "InteractiveObject.h"
+#include "PickableObject.h"
+
 #include <rlgl.h>
 
 using namespace VLV;
@@ -55,6 +59,8 @@ SimpleDoor* door1 = nullptr;
 Emitter<Particle>* em1;
 Emitter<Particle>* em2;
 
+PickableObject* interactiveObjectTest;
+
 static const int screenWidth = 1920;
 static const int screenHeight = 1080;
 
@@ -78,6 +84,8 @@ int main(void) {
 
     //SetMusicVolume(music, 1.0f);
     //PlayMusicStream(music);
+
+    interactiveObjectTest = new PickableObject();
 
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
@@ -224,6 +232,8 @@ static void UpdateGame(void) {
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
     //UpdateLightsArray(sh1, lights, player->camera);
 
+    interactiveObjectTest->Update(d);
+
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing(); {
@@ -235,6 +245,8 @@ static void UpdateGame(void) {
             em1->Draw(player.camera);
 
             em2->Draw(player.camera);
+
+            interactiveObjectTest->DrawObject();
 
             door1->Draw(mat);
 

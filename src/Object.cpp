@@ -18,6 +18,7 @@
 
 	Object::~Object() {
 		ObjectManager& objManager = ObjectManager::Instance();
+		HideObject();
 		objManager.__DeleteAdress(this);
 	}
 
