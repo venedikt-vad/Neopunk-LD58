@@ -29,6 +29,8 @@
     <ClCompile Include="..\..\..\src\Sound\SoundEffects.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\InteractiveObject.cpp" />
+    <ClCompile Include="..\..\..\src\PickableObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -64,6 +66,8 @@
     <ClInclude Include="..\..\..\src\Sound\SoundEffects.h">
       <Filter>Sound</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\InteractiveObject.h" />
+    <ClInclude Include="..\..\..\src\PickableObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

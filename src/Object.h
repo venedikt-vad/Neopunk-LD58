@@ -2,9 +2,11 @@
 #include "raylib.h"
 #include "raymath.h"
 
-	class Object {
+class Object {
 	public:
 		Object();
+
+		Object(Transform& tr);
 
 		~Object();
 
@@ -16,9 +18,11 @@
 
 		Quaternion GetRotation();
 
-		int GetIndex();
+		virtual int GetIndex();
 
 		virtual void SetTranform(Transform transform);
+  
+		virtual void SetIndex(int i);
 
 		virtual void Update(float dt) {};
 
