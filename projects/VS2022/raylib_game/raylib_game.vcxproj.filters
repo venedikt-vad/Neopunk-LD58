@@ -32,6 +32,9 @@
     <ClCompile Include="..\..\..\src\MapGenerator\MapGenerator.cpp">
       <Filter>MapGenerator</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\InteractiveObject.cpp" />
+    <ClCompile Include="..\..\..\src\PickableObject.cpp" />
+    <ClCompile Include="..\..\..\src\Enemies\EnemyTV.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -70,6 +73,9 @@
     <ClInclude Include="..\..\..\src\MapGenerator\MapGenerator.h">
       <Filter>MapGenerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\InteractiveObject.h" />
+    <ClInclude Include="..\..\..\src\PickableObject.h" />
+    <ClInclude Include="..\..\..\src\Enemies\EnemyTV.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

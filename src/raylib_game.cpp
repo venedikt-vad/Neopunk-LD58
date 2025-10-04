@@ -25,6 +25,7 @@
 #include "Lights\LightManager.h"
 #include "Collision\CollisionManager.h"
 #include "Particles\Emitter.h"
+#include "MapGenerator\MapGenerator.h"
 #include <iostream>
 
 #include "PlayerFP.h"
@@ -57,6 +58,7 @@ LightManager* gLightMgr = nullptr;
 
 EnemyTV* enemy;
 
+MapGenerator* map;
 
 Texture2D texture;
 Material mat;
@@ -104,7 +106,7 @@ int main(void) {
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
     
 
-    modelMap = LoadModel("resources/TestMap.obj");
+    //modelMap = LoadModel("resources/TestMap.obj");
     modelTV = LoadModel("resources/TV.obj");
     modelTV.transform = TransformToMatrix({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
@@ -115,51 +117,27 @@ int main(void) {
 
     mat = LoadMaterialDefault();
     mat.shader = sh1;
-    modelMap.materials[0] = mat;
-    modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
+    //modelMap.materials[0] = mat;
+    //modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
 
-    Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
+    //Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
     
-    CollisionManager& cMngr = CollisionManager::Instance(modelMap.meshes[0], mapTransform);
 
     //cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
 
-    mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
+    //mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
     SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
-    gLightMgr = new LightManager(sh1);
-    // Create lights
     
-    LM_Light L{};
-    L.type = LM_SPOT; L.enabled = LM_SIMPLE; L.radius = 15.f; L.angle = 45.f; L.color = { 255,250,240,255 }; L.intensity = 15;
-    L.position = { 17,7,7 }; L.direction = Vector3Scale(Vector3UnitZ, -1); gLightMgr->Add(L);
+    gLightMgr = new LightManager(sh1);
 
-    L.enabled = LM_SIMPLE;
+    map = new MapGenerator(sh1, gLightMgr);
 
-    for (size_t i = 0; i < 30; i++) {
-        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 }; L.intensity = 15;
+    CollisionManager& cMngr = CollisionManager::Instance(map);
 
-        L.position = { 19+i*4.f,6,11 }; gLightMgr->Add(L);
-
-    }
-
-    for (size_t i = 0; i < 30; i++) {
-        L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 11; L.angle = 30.f; L.color = { 255,255,150,255 };
-
-        L.position = { 12 + i * 6.f,-26,31 }; gLightMgr->Add(L);
-
-    }
-
-
-    // points:
-    LM_Light P{};
-    P.type = LM_POINT; P.enabled = LM_SIMPLE;
-    P.position = { 2,1,2 };   P.radius = 1.f; P.color = RED;   gLightMgr->Add(P);
-    P.position = { -2,1,2 };  P.radius = 3.f; P.color = GREEN; gLightMgr->Add(P);
-    P.position = { 2,1,2 };   P.radius = 5.f; P.color = BLUE;  gLightMgr->Add(P);
-
+    map->Generate(6);
 
     ParticleParams pt1; {
         pt1.tex = texture;
@@ -262,7 +240,8 @@ static void UpdateGame(void) {
         
         BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
-            DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
+            map->Draw();
+            //DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             // DrawModel(modelTV, { 0.f, 0.f, 3.f }, 1.f, WHITE);
             em1->Draw(player.camera);
 
