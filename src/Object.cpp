@@ -1,12 +1,24 @@
 #include "Object.h"
+#include "ObjectManager.h"
+#include <string>
 
 	Object::Object() {
 		objectTransform = { 0 };
-		objectIndex = 0;
+
+		ObjectManager& objManager = ObjectManager::Instance();
+		objManager.Append(this);
 	}
 
-	Object::~Object()
-	{
+	Object::Object(Transform& tr) {
+		objectTransform = tr;
+		ObjectManager& objManager = ObjectManager::Instance();
+		objManager.Append(this);
+		objectIndex = objManager.GetSizeObjects() - 1;
+	}
+
+	Object::~Object() {
+		ObjectManager& objManager = ObjectManager::Instance();
+		HideObject();
 	}
 
 	Transform Object::GetTransform() {
@@ -29,7 +41,12 @@
 		return objectIndex;
 	}
 
-	void Object::SetTranfarm()
-	{
+	void Object::SetTranfarm(Transform& tr){
+		objectTransform = tr;
 	}
+
+	void Object::SetIndex(int i) {
+		objectIndex = i;
+	}
+
 

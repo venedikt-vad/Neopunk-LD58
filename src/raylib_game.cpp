@@ -29,6 +29,12 @@
 #include "PlayerFP.h"
 #include "SimpleDoor.h"
 
+#include "Object.h"
+#include "InteractiveObject.h"
+#include "PickableObject.h"
+
+#include "ObjectManager.h"
+
 #include <rlgl.h>
 
 using namespace VLV;
@@ -55,6 +61,8 @@ SimpleDoor* door1 = nullptr;
 Emitter<Particle>* em1;
 Emitter<Particle>* em2;
 
+PickableObject* interactiveObjectTest;
+
 static const int screenWidth = 1920;
 static const int screenHeight = 1080;
 
@@ -78,6 +86,11 @@ int main(void) {
 
     //SetMusicVolume(music, 1.0f);
     //PlayMusicStream(music);
+
+    ObjectManager& objManager = ObjectManager::Instance();
+
+    interactiveObjectTest = new PickableObject(LoadModel("resources/UnitCube.obj"), TransformToMatrix({ { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }), { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }, KEY_E);
+    
 
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
@@ -201,6 +214,8 @@ static void UpdateGame(void) {
     CollisionManager& cMngr = CollisionManager::Instance();
 
 
+    ObjectManager& objManager = ObjectManager::Instance();
+
     float d = GetFrameTime();
     // Update
     //----------------------------------------------------------------------------------
@@ -224,6 +239,8 @@ static void UpdateGame(void) {
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
     //UpdateLightsArray(sh1, lights, player->camera);
 
+    objManager.UpdateObjects(d);
+
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing(); {
@@ -235,6 +252,8 @@ static void UpdateGame(void) {
             em1->Draw(player.camera);
 
             em2->Draw(player.camera);
+
+            objManager.DrawObjects();
 
             door1->Draw(mat);
 

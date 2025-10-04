@@ -35,9 +35,8 @@
 
 
 #define DEBUG_PLAYER
-namespace VLV {
 
-    class PlayerFP {
+class PlayerFP {
     public:
         Camera camera;
 
@@ -70,6 +69,11 @@ namespace VLV {
         float GetCurrentPlayerHeight();
 
         Ray CameraRay();
+
+        int invetoryWeight;
+
+        void AddObjToInventory(int i);
+
     private:
         PlayerFP();
         PlayerFP(Vector3 loc);
@@ -82,4 +86,4 @@ namespace VLV {
 
         MultiInstrument* runSound;
     };
-}
+

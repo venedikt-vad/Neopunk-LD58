@@ -3,10 +3,7 @@
 
 #define NORMALIZE_INPUT
 
-namespace VLV
-{
-
-    PlayerFP::PlayerFP()
+PlayerFP::PlayerFP()
     {
         Init({0, 0, 0.029});
     }
@@ -38,6 +35,8 @@ namespace VLV
         camera.projection = CAMERA_PERSPECTIVE;
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
+
+        invetoryWeight = NULL;
 
         runSound = new MultiInstrument({"resources/sounds/running2.wav",
                                         "resources/sounds/running3.wav",
@@ -322,4 +321,8 @@ namespace VLV
     {
         return GetCameraRay(camera);
     }
-}
+
+    void PlayerFP::AddObjToInventory(int i)
+    {
+        invetoryWeight += i;
+    }
