@@ -89,7 +89,7 @@ int main(void) {
 
     ObjectManager& objManager = ObjectManager::Instance();
 
-    interactiveObjectTest = new PickableObject();
+    interactiveObjectTest = new PickableObject(LoadModel("resources/UnitCube.obj"), TransformToMatrix({ { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }), { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }, KEY_E);
     
 
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));

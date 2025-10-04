@@ -20,6 +20,8 @@ public:
 
 	InteractiveObject();
 
+	InteractiveObject(Model model, Matrix matrix, Transform transform, int interactiveKey = KEY_E);
+
 	~InteractiveObject();
 
 
@@ -31,8 +33,6 @@ protected:
 	float rangeToObject;
 
 	Model objModel;
-	Texture2D texture;
-	Material mat;
 	
 	Matrix objMatrix;
 };

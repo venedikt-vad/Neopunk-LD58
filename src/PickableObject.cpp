@@ -20,6 +20,10 @@ PickableObject::PickableObject() {
 	weightObject = 1;
 }
 
+PickableObject::PickableObject(Model model, Matrix matrix, Transform transform, int interactiveKey) : InteractiveObject(model, matrix, transform, interactiveKey) {
+	//TODO
+}
+
 PickableObject::~PickableObject() {
 	//TODO
 }

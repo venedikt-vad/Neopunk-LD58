@@ -34,16 +34,30 @@ InteractiveObject::InteractiveObject() {
 	Ray rayCameraPlayer = player.CameraRay();
 
 	objModel = LoadModel("resources/UnitCube.obj");
-	texture = LoadTexture("resources/cubicmap_atlas.png");
 
-	mat = LoadMaterialDefault();
-	objModel.materials[0] = mat;
-	objModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+	objModel.materials[0] = LoadMaterialDefault();
+	objModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/cubicmap_atlas.png");
 
 	objectTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } };
 	
 	objMatrix = TransformToMatrix(objectTransform);
 	objModel.transform = objMatrix;
+}
+
+InteractiveObject::InteractiveObject(Model model, Matrix matrix, Transform transform, int interactiveKey) : Object(transform)  {
+	
+	int usedKey = interactiveKey;
+	rangeToObject = std::numeric_limits<float>::infinity();;
+
+	PlayerFP& player = PlayerFP::Instance();
+	Ray rayCameraPlayer = player.CameraRay();
+	
+	objModel = model;
+	objMatrix = matrix;
+	
+
+	objModel.transform = objMatrix;
+
 }
 
 InteractiveObject::~InteractiveObject() {

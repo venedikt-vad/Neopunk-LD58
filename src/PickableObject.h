@@ -11,6 +11,8 @@ public:
 
 	PickableObject();
 
+	PickableObject(Model model, Matrix matrix, Transform transform, int interactiveKey = KEY_E);
+
 	~PickableObject();
 
 	int weightObject;
