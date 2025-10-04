@@ -38,7 +38,8 @@
 
 #include <rlgl.h>
 #include "Enemies/EnemyTV.h"
-#include "Obtacles/LaserVertical.h"
+#include "Obtacles/Laser.h"
+#include "Obtacles/Mine.h"
 
 // using namespace VLV;
 //----------------------------------------------------------------------------------
@@ -58,7 +59,8 @@ LightManager* gLightMgr = nullptr;
 
 EnemyTV* enemy;
 
-LaserVertical* laser;
+Laser* laser;
+Mine* mine;
 
 Texture2D texture;
 Material mat;
@@ -113,8 +115,11 @@ int main(void) {
     enemy = new EnemyTV();
     // enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
-    laser = new LaserVertical();
+    laser = new Laser();
     laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI/3,PI/3,PI/3), { 1,1,1 } });
+
+    mine = new Mine();
+    mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
 
@@ -240,6 +245,10 @@ static void UpdateGame(void) {
     //UpdateMusicStream(music);       // NOTE: Music keeps playing between screens
     player.Update(d);
     laser->Update(d);
+    if (mine != nullptr) {
+        mine->Update(d);
+    }
+
 
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player.camera.position, SHADER_UNIFORM_VEC3);
     //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
@@ -280,6 +289,9 @@ static void UpdateGame(void) {
 
             enemy->DrawObject();
             laser->DrawObject();
+            if (mine != nullptr) {
+                mine->DrawObject();
+            }
 
             /*Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
             SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);

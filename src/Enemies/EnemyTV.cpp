@@ -86,6 +86,6 @@ void EnemyTV::DrawObject()
 
 void EnemyTV::SetTranform(Transform transform)
 {
-    modelTV.transform = TransformToMatrix({objectTransform.translation, objectTransform.rotation, objectTransform.scale});
+    modelTV.transform = TransformToMatrix(objectTransform);
     objectTransform = transform;
 }

@@ -4,12 +4,13 @@
 #include <string>
 #include "Object.h"
 #include "raylib.h"
+#include "Lights\LightManager.h"
 #include <Sound/Sound3d.h>
 
-class Laser : public Object {
+class Mine : public Object {
 public:
-    Laser();
-    ~Laser();
+    Mine();
+    ~Mine();
 
     void DrawObject() override;
     void Update(float dt) override;
@@ -18,5 +19,9 @@ private:
     Vector3 startPos;
     Vector3 endPos;
 
-    Sound3d* sound;
+    Model model;
+    Sound3d* expSound;
+    LM_Light light;
+
+    bool isDestroy = false;
 };

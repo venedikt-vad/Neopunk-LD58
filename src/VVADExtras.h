@@ -46,6 +46,7 @@ float randomFloat0to1();
 float randomFloatInRange(float min, float max);
 
 Vector3 GetForwardVector(const Transform &transform);
+Vector3 ClosestPointOnLine(Vector3 A, Vector3 B, Vector3 P);
 
 vec3 Vector3UnitRandom();
 
