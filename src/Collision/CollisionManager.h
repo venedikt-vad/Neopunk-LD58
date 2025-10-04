@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "VVADExtras.h"
+#include "MapGenerator\MapGenerator.h"
 
 struct CollisionBox {
 	Transform transform;
@@ -13,10 +14,12 @@ class CollisionManager {
 private:
 	static CollisionManager* instance;
 	CollisionManager(Mesh MapCollision, Transform MapTransform);
+	CollisionManager(MapGenerator* Map);
 	CollisionManager();
 public:
 	
 	static CollisionManager& Instance();
+	static CollisionManager& Instance(MapGenerator* Map);
 	static CollisionManager& Instance(Mesh MapCollision, Transform MapTransform);
 
 	~CollisionManager ();
@@ -32,9 +35,12 @@ public:
 	void DrawBox(CollisionBox* box, Material m);
 
 	Mesh MapStaticMesh;
-	Mesh UnitBoxMesh;
 private:
+
 	Matrix MapMeshTransform;
+	MapGenerator* map = nullptr;
+
+	Mesh UnitBoxMesh;
 	std::vector<CollisionBox*> DynamicBoxes;
 };
 

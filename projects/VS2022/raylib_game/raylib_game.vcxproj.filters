@@ -29,6 +29,9 @@
     <ClCompile Include="..\..\..\src\Sound\SoundEffects.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\MapGenerator\MapGenerator.cpp">
+      <Filter>MapGenerator</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\InteractiveObject.cpp" />
     <ClCompile Include="..\..\..\src\PickableObject.cpp" />
     <ClCompile Include="..\..\..\src\Enemies\EnemyTV.cpp" />
@@ -67,6 +70,9 @@
     <ClInclude Include="..\..\..\src\Sound\SoundEffects.h">
       <Filter>Sound</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\MapGenerator\MapGenerator.h">
+      <Filter>MapGenerator</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\InteractiveObject.h" />
     <ClInclude Include="..\..\..\src\PickableObject.h" />
     <ClInclude Include="..\..\..\src\Enemies\EnemyTV.h" />
@@ -92,6 +98,9 @@
     </Filter>
     <Filter Include="Sound">
       <UniqueIdentifier>{f8c46894-befb-4d6d-a516-f9ac9f2330d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MapGenerator">
+      <UniqueIdentifier>{2b87f347-366b-4075-a3e9-d9e5f5740cb6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
