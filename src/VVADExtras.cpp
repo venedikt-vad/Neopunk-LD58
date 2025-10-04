@@ -184,6 +184,13 @@ Quaternion QuaternionFromForward(Vector3 forward) {
     return QuaternionFromMatrix(m);
 }
 
+Vector3 GetForwardVector(const Transform &transform) {
+    Matrix rot = QuaternionToMatrix(transform.rotation);
+    Vector3 forward = {0.0f, 0.0f, 1.0f};
+    forward = Vector3Transform(forward, rot);
+    return Vector3Normalize(forward);
+}
+
 static bool PointInTriBary(Vector3 P, Vector3 A, Vector3 B, Vector3 C, float eps)
 {
     Vector3 v0 = Vector3Subtract(C, A);

@@ -45,6 +45,8 @@ float randomFloat0to1();
 
 float randomFloatInRange(float min, float max);
 
+Vector3 GetForwardVector(const Transform &transform);
+
 vec3 Vector3UnitRandom();
 
 vec3 Vector3RandomInVolume(vec3 volume);
