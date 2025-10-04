@@ -1,12 +1,18 @@
 #include "Object.h"
+#include <string>
 
 	Object::Object() {
 		objectTransform = { 0 };
 		objectIndex = 0;
 	}
 
-	Object::~Object()
-	{
+	Object::Object(Transform& tr) {
+		objectTransform = tr;
+		objectIndex = 0;
+	}
+
+	Object::~Object() {
+		//TODO
 	}
 
 	Transform Object::GetTransform() {
@@ -29,7 +35,12 @@
 		return objectIndex;
 	}
 
-	void Object::SetTranfarm()
-	{
+	void Object::SetTranfarm(Transform& tr){
+		objectTransform = tr;
 	}
+
+	void Object::SetIndex(int i) {
+		objectIndex = i;
+	}
+
 

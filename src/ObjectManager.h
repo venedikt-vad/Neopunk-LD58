@@ -4,22 +4,25 @@
 #include <vector>
 #include <string>
 
-	class ObjectManager {
+class ObjectManager {
 	public:
 
-		void Append();
+		void Append(Object* obj);
 
 		void Delete();
+
+		void Delete(Object* obj);
+
+		void Delete(int objectIndex);
 
 		static ObjectManager& Instance();
 
 
-
 	private:
 
-		ObjectManager() {}
+		ObjectManager();
 
-		~ObjectManager() {}
+		~ObjectManager();
 
 		ObjectManager(ObjectManager const&) = delete;
 

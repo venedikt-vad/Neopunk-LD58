@@ -6,6 +6,8 @@
 	public:
 		Object();
 
+		Object(Transform& tr);
+
 		~Object();
 
 		Transform GetTransform();
@@ -18,7 +20,9 @@
 
 		int GetIndex();
 
-		void SetTranfarm();
+		void SetTranfarm(Transform& tr);
+
+		void SetIndex(int i);
 
 		virtual void Update(float dt) {};
 
