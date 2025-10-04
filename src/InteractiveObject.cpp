@@ -1,7 +1,6 @@
 #include "InteractiveObject.h"
 #include "Collision/CollisionManager.h"
 #include <string>
-#include <iostream>
 
 void InteractiveObject::Interactive() {
 	PlayerFP& player = PlayerFP::Instance();

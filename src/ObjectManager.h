@@ -16,7 +16,11 @@ class ObjectManager {
 
 		void Delete(int objectIndex);
 
-		void __DeleteAdress(Object* obj);
+		void UpdateObjects(int dt);
+
+		void DrawObjects();
+
+		//void __DeleteAdress(Object* obj);
 
 		int GetSizeObjects();
 

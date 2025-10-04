@@ -33,6 +33,8 @@
 #include "InteractiveObject.h"
 #include "PickableObject.h"
 
+#include "ObjectManager.h"
+
 #include <rlgl.h>
 
 using namespace VLV;
@@ -85,7 +87,10 @@ int main(void) {
     //SetMusicVolume(music, 1.0f);
     //PlayMusicStream(music);
 
+    ObjectManager& objManager = ObjectManager::Instance();
+
     interactiveObjectTest = new PickableObject();
+    
 
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
@@ -209,6 +214,8 @@ static void UpdateGame(void) {
     CollisionManager& cMngr = CollisionManager::Instance();
 
 
+    ObjectManager& objManager = ObjectManager::Instance();
+
     float d = GetFrameTime();
     // Update
     //----------------------------------------------------------------------------------
@@ -232,7 +239,7 @@ static void UpdateGame(void) {
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
     //UpdateLightsArray(sh1, lights, player->camera);
 
-    interactiveObjectTest->Update(d);
+    objManager.UpdateObjects(d);
 
     // Draw
     //----------------------------------------------------------------------------------
@@ -246,7 +253,7 @@ static void UpdateGame(void) {
 
             em2->Draw(player.camera);
 
-            interactiveObjectTest->DrawObject();
+            objManager.DrawObjects();
 
             door1->Draw(mat);
 
