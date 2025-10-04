@@ -40,7 +40,7 @@ const vec3 VectorNormalProject(vec3 vector, vec3 planeNormal) {
     // Calculate dot product of vector and normalized normal
     float dotProduct = Vector3DotProduct(vector, normalizedNormal);
 
-    // Project vector onto normal: (v�n) * n
+    // Project vector onto normal: (v�n) * n
     return Vector3Scale(normalizedNormal, dotProduct);
 }
 
@@ -159,6 +159,30 @@ Matrix TransformToMatrix(Transform transform) {
     return _tfMatrix;
 }
 
+Quaternion QuaternionFromForward(Vector3 forward) {
+    // 1) Защита от нулевого направления
+    if (Vector3LengthSqr(forward) < 1e-12f) return QuaternionIdentity();
+
+    // 2) Нормализуем forward
+    forward = Vector3Normalize(forward);
+
+    // 3) Базовый мировой up = Z, если почти параллелен — запасной = Y
+    Vector3 up = (fabsf(Vector3DotProduct(forward,  { 0, 0, 1 })) > 0.999f) ? Vector3UnitY : Vector3UnitZ;
+
+    // 4) Праворукий базис
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(up, forward));  // right = up × forward
+    up = Vector3CrossProduct(forward, right);                            // up = forward × right (уже нормализован)
+
+    // 5) Матрица: колонки = right, up, forward (OpenGL/raylib column-major)
+    Matrix m = {
+        right.x,   up.x,      forward.x, 0.0f,   // m0  m4  m8  m12
+        right.y,   up.y,      forward.y, 0.0f,   // m1  m5  m9  m13
+        right.z,   up.z,      forward.z, 0.0f,   // m2  m6  m10 m14
+        0.0f,      0.0f,      0.0f,      1.0f    // m3  m7  m11 m15
+    };
+
+    return QuaternionFromMatrix(m);
+}
 
 static bool PointInTriBary(Vector3 P, Vector3 A, Vector3 B, Vector3 C, float eps)
 {
@@ -280,7 +304,7 @@ SphereTraceCollision GetSphereTraceCollisionTriangle(Ray inRay, float sphereRadi
 #define FACE_EPS  1e-3f
     SphereTraceCollision col = { 0 };
 
-    // Normalize ray; we�ll convert t back to world units
+    // Normalize ray; we�ll convert t back to world units
     float dirLen = Vector3Length(inRay.direction);
     if (dirLen < EPSILON) return col;
     Ray rayN = inRay;
