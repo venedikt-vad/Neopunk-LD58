@@ -33,6 +33,21 @@ const vec3 VectorPlaneProject(vec3 vector, vec3 planeNormal) {
     return Vector3Subtract(vector, normalProjection);
 }
 
+Vector3 ClosestPointOnLine(Vector3 A, Vector3 B, Vector3 P)
+{
+    Vector3 AB = Vector3Subtract(B, A);
+    Vector3 AP = Vector3Subtract(P, A);
+
+    float ab2 = Vector3DotProduct(AB, AB);
+    if (ab2 == 0.0f) return A;
+
+    float t = Vector3DotProduct(AP, AB) / ab2;
+    if (t < 0.0f) t = 0.0f;
+    else if (t > 1.0f) t = 1.0f;
+
+    return Vector3Add(A, Vector3Scale(AB, t));
+}
+
 const vec3 VectorNormalProject(vec3 vector, vec3 planeNormal) {
     // Normalize the plane normal to ensure it's a unit vector
     vec3 normalizedNormal = Vector3Normalize(planeNormal);
@@ -182,6 +197,13 @@ Quaternion QuaternionFromForward(Vector3 forward) {
     };
 
     return QuaternionFromMatrix(m);
+}
+
+Vector3 GetForwardVector(const Transform &transform) {
+    Matrix rot = QuaternionToMatrix(transform.rotation);
+    Vector3 forward = {0.0f, 0.0f, 1.0f};
+    forward = Vector3Transform(forward, rot);
+    return Vector3Normalize(forward);
 }
 
 static bool PointInTriBary(Vector3 P, Vector3 A, Vector3 B, Vector3 C, float eps)
