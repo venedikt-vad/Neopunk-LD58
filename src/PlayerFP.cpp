@@ -3,30 +3,25 @@
 
 #define NORMALIZE_INPUT
 
-PlayerFP::PlayerFP()
-    {
+    PlayerFP::PlayerFP(int weight, int health) : invetoryWeight(weight), hpPlayer(health) {
         Init({0, 0, 0.029});
     }
 
-    PlayerFP::PlayerFP(Vector3 loc)
-    {
+    PlayerFP::PlayerFP(Vector3 loc, int weight, int health) : invetoryWeight(weight), hpPlayer(health) {
         Init(loc);
     }
 
-    PlayerFP &PlayerFP::Instance()
-    {
+    PlayerFP &PlayerFP::Instance() {
         static PlayerFP pFP;
         return pFP;
     }
 
-    PlayerFP &PlayerFP::Instance(Vector3 loc)
-    {
+    PlayerFP &PlayerFP::Instance(Vector3 loc) {
         static PlayerFP pFP;
         return pFP;
     }
 
-    void PlayerFP::Init(Vector3 loc)
-    {
+    void PlayerFP::Init(Vector3 loc) {
         position = loc;
         velocity = Vector3Zero();
         dir = Vector3Zero();
@@ -36,6 +31,7 @@ PlayerFP::PlayerFP()
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
 
+        hpPlayer = 1;
         invetoryWeight = NULL;
 
         runSound = new MultiInstrument({"resources/sounds/running2.wav",
@@ -52,7 +48,7 @@ PlayerFP::PlayerFP()
         DisableCursor();
     }
 
-    void PlayerFP::Update(float d){
+    void PlayerFP::Update(float d) {
 
         CollisionManager& cMngr = CollisionManager::Instance();
 
@@ -251,7 +247,11 @@ PlayerFP::PlayerFP()
 
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
-    }
+    
+        if (hpPlayer < 0) {
+            deathPlayer();
+        }
+}
 
     void PlayerFP::UpdateCameraPos()
     {
@@ -320,6 +320,14 @@ PlayerFP::PlayerFP()
     Ray PlayerFP::CameraRay()
     {
         return GetCameraRay(camera);
+    }
+
+    void PlayerFP::HaveDamage(int damage) {
+        hpPlayer -= damage;
+    }
+
+    void PlayerFP::deathPlayer() {
+        //TODO
     }
 
     void PlayerFP::AddObjToInventory(int i)

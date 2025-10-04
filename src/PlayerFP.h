@@ -71,12 +71,20 @@ class PlayerFP {
         Ray CameraRay();
 
         int invetoryWeight;
+        int hpPlayer;
 
+        void HaveDamage(int damage);
+
+        void deathPlayer();
+        
         void AddObjToInventory(int i);
 
+
+
     private:
-        PlayerFP();
-        PlayerFP(Vector3 loc);
+        PlayerFP(int weight = 0, int health = 100);
+        
+        PlayerFP(Vector3 loc, int weight = 0, int health = 100);
 
         ~PlayerFP() {};
 
