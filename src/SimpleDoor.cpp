@@ -1,6 +1,6 @@
 #include "SimpleDoor.h"
 
-using namespace VLV;
+// using namespace VLV;
 
 SimpleDoor::SimpleDoor(Transform doorTransform) {
 	collider = NewCollider(doorTransform);

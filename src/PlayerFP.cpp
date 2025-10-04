@@ -3,8 +3,8 @@
 
 #define NORMALIZE_INPUT
 
-namespace VLV
-{
+// namespace VLV
+// {
 
     PlayerFP::PlayerFP()
     {
@@ -322,4 +322,4 @@ namespace VLV
     {
         return GetCameraRay(camera);
     }
-}
+// }

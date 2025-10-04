@@ -18,7 +18,7 @@
 
 		int GetIndex();
 
-		void SetTranfarm();
+		virtual void SetTranform(Transform transform);
 
 		virtual void Update(float dt) {};
 

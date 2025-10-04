@@ -6,8 +6,8 @@
 #include "Sound\Sound3d.h"
 #include "PlayerFP.h"
 
-namespace VLV
-{
+// namespace VLV
+// {
 	class SimpleDoor
 	{
 	public:
@@ -24,4 +24,4 @@ namespace VLV
 
 		PlayerFP &playerInstance = PlayerFP::Instance();
 	};
-}
+// }

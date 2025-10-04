@@ -35,7 +35,7 @@
 
 
 #define DEBUG_PLAYER
-namespace VLV {
+// namespace VLV {
 
     class PlayerFP {
     public:
@@ -82,4 +82,4 @@ namespace VLV {
 
         MultiInstrument* runSound;
     };
-}
+// }
