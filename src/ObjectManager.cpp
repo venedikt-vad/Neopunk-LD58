@@ -8,7 +8,9 @@ void ObjectManager::Append(Object* obj) {
 }
 
 void ObjectManager::Delete() {
-	objects.clear();
+	for (auto elem:objects) {
+		delete elem;
+	}
 }
 
 void ObjectManager::Delete(Object* obj) {
@@ -17,7 +19,9 @@ void ObjectManager::Delete(Object* obj) {
 		if (iter == objects.end()) {
 			throw std::string("EXEPTION: couldn't find an element in the array");
 		}
-		objects.erase(iter);
+		for (int i = iter - objects.begin(); i < objects.size(); i++) {
+			objects[i]->SetIndex(i);
+		}
 	} 
 	else {
 		throw std::string("EXEPTION: attempt to delete an item from an empty list of objects");
@@ -26,7 +30,11 @@ void ObjectManager::Delete(Object* obj) {
 
 void ObjectManager::Delete(int objectIndex) {
 	if (!objects.empty()) {
+		delete* (objects.begin() + objectIndex);
 		objects.erase(objects.begin() + objectIndex);
+		for (int i = objectIndex; i < objects.size(); i++) {
+			objects[i]->SetIndex(i);
+		}
 	}
 	else {
 		throw std::string("EXEPTION: attempt to delete an item from an empty list of objects");
@@ -39,6 +47,16 @@ ObjectManager::ObjectManager() {
 
 ObjectManager::~ObjectManager() {
 	//TODO
+}
+
+//A utility function that removes an element only from ObjectManager
+void ObjectManager::__DeleteAdress(Object* obj) {
+	auto iter = std::find(objects.begin(), objects.end(), obj);
+	objects.erase(iter);
+}
+
+int ObjectManager::GetSizeObjects() {
+	return objects.size();
 }
 
 ObjectManager& ObjectManager::Instance() {

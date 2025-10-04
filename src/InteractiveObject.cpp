@@ -9,7 +9,7 @@ void InteractiveObject::Interactive() {
 	rangeToObject = Vector3Length(rangeVector);
 	if (rangeToObject < 5
 		&& (Vector3DotProduct(Vector3Normalize(rayCameraPlayer.position - rayCameraPlayer.direction), Vector3Normalize(rangeVector)) > 0.8)) {
-		if (IsKeyDown(KEY_E)) {
+		if (IsKeyDown(usedKey)) {
 			ResultInteract();
 		}
 	}
@@ -24,8 +24,13 @@ void InteractiveObject::Update(float dt) {
 }
 
 InteractiveObject::InteractiveObject() {
+
+	int usedKey = KEY_NULL;
+	rangeToObject = std::numeric_limits<float>::infinity();;
+
 	PlayerFP& player = PlayerFP::Instance();
 	Ray rayCameraPlayer = player.CameraRay();
+
 }
 
 InteractiveObject::~InteractiveObject() {

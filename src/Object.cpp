@@ -1,18 +1,24 @@
 #include "Object.h"
+#include "ObjectManager.h"
 #include <string>
 
 	Object::Object() {
 		objectTransform = { 0 };
-		objectIndex = 0;
+
+		ObjectManager& objManager = ObjectManager::Instance();
+		objManager.Append(this);
 	}
 
 	Object::Object(Transform& tr) {
 		objectTransform = tr;
-		objectIndex = 0;
+		ObjectManager& objManager = ObjectManager::Instance();
+		objManager.Append(this);
+		objectIndex = objManager.GetSizeObjects() - 1;
 	}
 
 	Object::~Object() {
-		//TODO
+		ObjectManager& objManager = ObjectManager::Instance();
+		objManager.__DeleteAdress(this);
 	}
 
 	Transform Object::GetTransform() {
