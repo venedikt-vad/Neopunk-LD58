@@ -8,7 +8,7 @@ SimpleDoor::SimpleDoor(Transform doorTransform) {
 	cMngr.AddDynamicBox(&collider);
 	t = doorTransform;
 	sound = new Sound3d("resources/sounds/openTheDoor.mp3");
-	sound->Play();
+	// sound->Play();
 }
 
 SimpleDoor::~SimpleDoor() {

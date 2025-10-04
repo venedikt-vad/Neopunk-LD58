@@ -4,6 +4,7 @@
 #include <string>
 #include "Object.h"
 #include "raylib.h"
+#include <Sound/Sound3d.h>
 
 class EnemyTV : public Object {
 public:
@@ -15,4 +16,6 @@ public:
     void SetTranform(Transform transform) override;
 private:
     Model modelTV;
+    Sound3d* voidSound;
+    Sound3d* voicesSound;
 };

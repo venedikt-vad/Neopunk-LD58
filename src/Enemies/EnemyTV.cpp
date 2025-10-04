@@ -17,11 +17,17 @@ EnemyTV::EnemyTV()
     modelTV = LoadModel("resources/TV.obj");
     objectTransform = {{0.f, 0.f, 3.f}, QuaternionFromEuler(0, 0, 0), {1, 1, 1}};
     modelTV.transform = TransformToMatrix(objectTransform);
+
+    voidSound = new Sound3d("resources/sounds/void.wav", 3.f, 10.f);
+    voicesSound = new Sound3d("resources/sounds/voices.wav", 3.f, 10.f);
+
 }
 
 EnemyTV::~EnemyTV()
 {
     UnloadModel(modelTV);
+    delete voidSound;
+    delete voicesSound;
 }
 
 void EnemyTV::Update(float dt)
@@ -41,10 +47,31 @@ void EnemyTV::Update(float dt)
 
     Ray r = { objectTransform.translation, Vector3Normalize(direction) };
     RayCollision collision = cMngrInsance.GetRayCollision(r,true);
-    
-    bool isLooking = IsCameraLookingAtObject(playerInstance.camera, objectTransform.translation);
 
-    std::cout<< IsCameraLookingAtObject(playerInstance.camera, objectTransform.translation) << std::endl;
+    bool isLooking = IsCameraLookingAtObject(playerInstance.camera, objectTransform.translation);
+    if (isLooking) {
+        if (voicesSound->IsPlayingSound()) {
+            voicesSound->Pause();
+            voidSound->Resume();
+        }
+        if (!voidSound->IsPlayingSound()) {
+            voidSound->Play();
+        } else {
+            voidSound->Resume();
+        }
+    } else {
+        if (voidSound->IsPlayingSound()) {
+            voidSound->Pause();
+            voicesSound->Resume();
+        }
+        if (!voicesSound->IsPlayingSound()) {
+            voicesSound->Play();
+        } else {
+            voicesSound->Resume();
+        }
+    }
+    voidSound->SetSoundPosition(playerInstance.camera, objectTransform.translation);
+    voicesSound->SetSoundPosition(playerInstance.camera, objectTransform.translation);
 
     SetTranform(
         {objectTransform.translation + dirNorm * !isLooking * 0.05,

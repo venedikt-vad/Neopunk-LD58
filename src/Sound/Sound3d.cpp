@@ -5,8 +5,10 @@
 Sound3d::Sound3d() {
 }
 
-Sound3d::Sound3d(std::string path) {
+Sound3d::Sound3d(std::string path, float _maxValue, float _maxDist) {
     sound = LoadSound(path.c_str());
+    maxValue = _maxValue;
+    maxDist = _maxDist;
 }
 
 Sound3d::~Sound3d() {
@@ -15,6 +17,10 @@ Sound3d::~Sound3d() {
 
 void Sound3d::Play() {
     PlaySound(sound);
+}
+
+void Sound3d::Resume() {
+    ResumeSound(sound);
 }
 
 void Sound3d::Pause() {
@@ -67,6 +73,6 @@ void Sound3d::SetSoundPosition(Camera listener, Vector3 position) {
     float pan = 0.5f - 0.3f*Vector3DotProduct(normalizedDirection, right);
 
     // Apply final sound properties
-    SetSoundVolume(sound, attenuation);
+    SetSoundVolume(sound, attenuation * maxValue);
     SetSoundPan(sound, pan);
 }
