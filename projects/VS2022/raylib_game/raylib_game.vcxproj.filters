@@ -94,7 +94,7 @@
       <UniqueIdentifier>{f8c46894-befb-4d6d-a516-f9ac9f2330d3}</UniqueIdentifier>
     </Filter>
     <Filter Include="MapGenerator">
-      <UniqueIdentifier>{416d0cee-b051-49de-83ef-6538fc9cfb23}</UniqueIdentifier>
+      <UniqueIdentifier>{2b87f347-366b-4075-a3e9-d9e5f5740cb6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

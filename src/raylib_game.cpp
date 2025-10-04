@@ -25,9 +25,11 @@
 #include "Lights\LightManager.h"
 #include "Collision\CollisionManager.h"
 #include "Particles\Emitter.h"
+#include "MapGenerator\MapGenerator.h"
 
 #include "PlayerFP.h"
 #include "SimpleDoor.h"
+
 
 #include <rlgl.h>
 
@@ -46,6 +48,7 @@ Matrix mapMatrix;
 Shader sh1;
 LightManager* gLightMgr = nullptr;
 
+MapGenerator* mapGen = nullptr;
 
 Texture2D texture;
 Material mat;
@@ -83,21 +86,24 @@ int main(void) {
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
     
 
-    modelMap = LoadModel("resources/tileEmpty.obj");
+    //modelMap = LoadModel("resources/tileEmpty.obj");
     //LoadMaterials("")
 
     texture = LoadTexture("resources/tex/WorldTextures.png");    // Load map texture
     
     mat = LoadMaterialDefault();
     mat.shader = sh1;
-    modelMap.materials[0] = mat;
-    modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
+    //modelMap.materials[0] = mat;
+    //modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
+    gLightMgr = new LightManager(sh1);
 
-    Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
+    mapGen = new MapGenerator(sh1, gLightMgr);
 
-    CollisionManager& cMngr = CollisionManager::Instance(modelMap.meshes[0], mapTransform);
+    Transform mapTransform = { { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } };
 
-    //cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
+    CollisionManager& cMngr = CollisionManager::Instance(mapGen);
+
+    //CollisionManager& cMngr = CollisionManager::Instance(modelMap.meshes[0], mapTransform);
 
     mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
     
@@ -109,7 +115,6 @@ int main(void) {
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.3f, 0.4f, 0.4f, 1.0f };
     SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
-    gLightMgr = new LightManager(sh1);
     // Create lights
     
     LM_Light L{};
@@ -172,6 +177,7 @@ int main(void) {
     Transform doorTransform = { { 23.f, 9.f, 3.f }, QuaternionIdentity(), {1,6,2}};
 
     door1 = new SimpleDoor(doorTransform);
+    mapGen->Generate(5);
 
     
 
@@ -237,7 +243,9 @@ static void UpdateGame(void) {
         
         BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
-            DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
+            //DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
+            mapGen->Draw();
+            
             em1->Draw(player.camera);
 
             em2->Draw(player.camera);
@@ -248,7 +256,10 @@ static void UpdateGame(void) {
             SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);
             DrawSphere(gravRay.position, .1f, Color{ 230, 41, 55, 255 });
             DrawSphere(gravCollision.point, .1f, Color{ 0, 231, 55, 255 });*/
-
+            /*for (size_t i = 0; i < gLightMgr->Count(); i++) {
+                LM_Light l = gLightMgr->Get(i);
+                DrawSphere(l.position, .5, Color{ 230, 41, 55, 255 });
+            }*/
 
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);
