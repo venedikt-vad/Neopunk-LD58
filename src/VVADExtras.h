@@ -51,6 +51,8 @@ vec3 Vector3RandomInVolume(vec3 volume);
 
 vec3 Vector3ConeRandom(vec3 dir, float angle);
 
+Quaternion QuaternionFromForward(Vector3 forward);
+
 //Thanks to Boyfinn https://github.com/raysan5/raylib/discussions/3670
 Matrix TransformToMatrix(Transform transform);
 //--

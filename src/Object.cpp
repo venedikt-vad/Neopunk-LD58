@@ -41,8 +41,7 @@
 		return objectIndex;
 	}
 
-	void Object::SetTranfarm(Transform& tr){
-		objectTransform = tr;
+	void Object::SetTranform(Transform transform) {
 	}
 
 	void Object::SetIndex(int i) {

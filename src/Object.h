@@ -20,8 +20,8 @@ class Object {
 
 		virtual int GetIndex();
 
-		virtual void SetTranfarm(Transform& tr);
-
+		virtual void SetTranform(Transform transform);
+  
 		virtual void SetIndex(int i);
 
 		virtual void Update(float dt) {};

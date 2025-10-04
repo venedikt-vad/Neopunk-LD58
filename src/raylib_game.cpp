@@ -25,6 +25,7 @@
 #include "Lights\LightManager.h"
 #include "Collision\CollisionManager.h"
 #include "Particles\Emitter.h"
+#include <iostream>
 
 #include "PlayerFP.h"
 #include "SimpleDoor.h"
@@ -36,8 +37,9 @@
 #include "ObjectManager.h"
 
 #include <rlgl.h>
+#include "Enemies/EnemyTV.h"
 
-using namespace VLV;
+// using namespace VLV;
 //----------------------------------------------------------------------------------
 // Shared Variables Definition (global)
 //----------------------------------------------------------------------------------
@@ -47,14 +49,20 @@ Sound fxCoin = { 0 };
 
 
 Model modelMap;
+Model modelTV;
 Matrix mapMatrix;
 
 Shader sh1;
 LightManager* gLightMgr = nullptr;
 
+EnemyTV* enemy;
+
 
 Texture2D texture;
 Material mat;
+Material mat1;
+Material mat2;
+Material mat3;
 
 SimpleDoor* door1 = nullptr;
 
@@ -97,9 +105,14 @@ int main(void) {
     
 
     modelMap = LoadModel("resources/TestMap.obj");
+    modelTV = LoadModel("resources/TV.obj");
+    modelTV.transform = TransformToMatrix({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
+
+    enemy = new EnemyTV();
+    // enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
-    
+
     mat = LoadMaterialDefault();
     mat.shader = sh1;
     modelMap.materials[0] = mat;
@@ -239,6 +252,7 @@ static void UpdateGame(void) {
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
     //UpdateLightsArray(sh1, lights, player->camera);
 
+    enemy->Update(1);
     objManager.UpdateObjects(d);
 
     // Draw
@@ -249,6 +263,7 @@ static void UpdateGame(void) {
         BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
             DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
+            // DrawModel(modelTV, { 0.f, 0.f, 3.f }, 1.f, WHITE);
             em1->Draw(player.camera);
 
             em2->Draw(player.camera);
@@ -256,6 +271,8 @@ static void UpdateGame(void) {
             objManager.DrawObjects();
 
             door1->Draw(mat);
+
+            enemy->DrawObject();
 
             /*Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
             SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);
