@@ -42,6 +42,7 @@
 #include "Obtacles/Laser.h"
 #include "Obtacles/Mine.h"
 #include "HQ_InteractionPoint.h"
+#include "bed_InteractionPoint.h"
 
 // using namespace VLV;
 //----------------------------------------------------------------------------------
@@ -56,6 +57,7 @@ LightManager* gLightMgr = nullptr;
 MapGenerator* map;
 
 HQ_InteractionPoint* HQ;
+bed_InteractionPoint* bed;
 
 Model modelTV;
 
@@ -109,6 +111,7 @@ int main(void) {
     mat.shader = sh1;
 
     ObjectManager& objManager = ObjectManager::Instance();
+
     
     //interactiveObjectTest = new PickableObject(LoadModel("resources/UnitCube.obj"), { { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI / 2,0,0), { 0.1,0.1,0.1 } }, KEY_E);
 
@@ -137,7 +140,19 @@ int main(void) {
 
     CollisionManager& cMngr = CollisionManager::Instance(map);
 
-    map->Generate(6);
+    PlayerFP& player = PlayerFP::Instance();
+
+    map->Generate(8);
+
+
+    laser = new Laser();
+    laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI / 3,PI / 3,PI / 3), { 1,1,1 } });
+
+    mine = new Mine();
+    mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
+
+    HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
+    bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
 
     ParticleParams pt1; {
         pt1.tex = texture;
@@ -221,6 +236,8 @@ static void UpdateGame(void) {
     //em1->Update(d);
     //em2->Update(d);
 
+    enemy->Update(d);
+
     door1->Update(d);
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
@@ -248,6 +265,8 @@ static void UpdateGame(void) {
 
             objManager.DrawObjects();
 
+            enemy->DrawObject();
+
             door1->Draw(mat);
 
             laser->DrawObject();
@@ -270,12 +289,81 @@ static void UpdateGame(void) {
 
         //HUD
         {
-            //Interaction HUD
-            {
-                if (player.drawInteraction) {
-                    const Color interactCol = Color{ 255, 255, 255, 200 };
-                    const Rectangle interactRec = { screenWidth / 2 - 20, screenHeight / 2 - 20, 40, 40 };
-                    DrawRectangleLinesEx(interactRec, 10, interactCol);
+            
+                if (bed->dayEndscreen) {
+                    //Day end screen
+
+                    DrawRectangle(0, 0, screenWidth, screenHeight, BLACK);
+                    if (GetTime() - bed->dayEndscreenBeginTime < 3) {
+                        DrawText("day finished", screenWidth / 2 - 170, screenHeight / 2 - 20, 40, WHITE);
+                    } else if (GetTime() - bed->dayEndscreenBeginTime < 6) {
+                        DrawText("you hear the metal creaking\ncity continue to grow...", screenWidth / 2 - 220, screenHeight / 2 - 50, 40, WHITE);
+                    } else {
+                        map->Generate(8);
+                        HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
+                        bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
+                    }
+                    
+                } else {
+                    //Interaction HUD
+                    {
+                        if (player.drawInteraction) {
+                            const Color interactCol = Color{ 255, 255, 255, 200 };
+                            const Rectangle interactRec = { screenWidth / 2 - 20, screenHeight / 2 - 20, 40, 40 };
+                            DrawRectangleLinesEx(interactRec, 10, interactCol);
+                        }
+                    }
+
+                    //Backpack HUD
+                    {
+                        const Color backpackCol = Color{ 200, 189, 0, 200 };
+                        const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
+
+                        DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
+                        DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
+                        DrawRectangleLinesEx(backpackRec, 5, backpackCol);
+                        DrawRectangle(backpackRec.x,
+                            backpackRec.y + (backpackRec.height * (1 - player.getBackpackPercent())),
+                            backpackRec.width, backpackRec.height * player.getBackpackPercent(),
+                            backpackCol);
+                    }
+
+                    //DrawHomeLocation HUD
+                    {
+                        if (!HQ->isQuotaComplete) {
+                            vec3 homeLoc = HQ->GetPosition();
+
+                            if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
+                                const Color homeCol = Color{ 0, 229, 0, 200 };
+                                vec2 coord = GetWorldToScreen(homeLoc, player.camera);
+                                Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
+                                DrawRectangleLinesEx(homeRec, 5, homeCol);
+                                std::string homeStr = "Home/HQ " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m\ndeliver items here";
+                                DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
+                            }
+                        } else {
+                            vec3 homeLoc = bed->GetPosition();
+
+                            if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
+                                const Color homeCol = Color{ 0, 229, 0, 200 };
+                                vec2 coord = GetWorldToScreen(homeLoc, player.camera);
+                                Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
+                                DrawRectangleLinesEx(homeRec, 5, homeCol);
+                                std::string homeStr = "Bed " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m\nend your day";
+                                DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
+                            }
+                        }
+
+                    }
+
+                    //quota HUD
+                    {
+                        const Color quotaCol = Color{ 200, 59, 0, 200 };
+                        DrawText("Remaining quota: ", screenWidth - 250, 20, 20, quotaCol);
+
+                        DrawText(HQ->isQuotaComplete ? "Complete" : (std::to_string(HQ->quota - HQ->collectedQuota) + " kg").c_str(), screenWidth - 250, 40, 50, quotaCol);
+
+                    }
                 }
             }
 
@@ -293,28 +381,7 @@ static void UpdateGame(void) {
                     backpackCol);
             }
 
-            //DrawHomeLocation HUD
-            {
-                vec3 homeLoc = Vector3Zeros;
-
-                if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
-                    const Color homeCol = Color{ 0, 229, 0, 200 };
-                    vec2 coord = GetWorldToScreen(homeLoc, player.camera);
-                    Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
-                    DrawRectangleLinesEx(homeRec, 5, homeCol);
-                    std::string homeStr = "Home/HQ " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
-                    DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
-                }
-            }
-
-            //quota HUD
-            {
-                const Color quotaCol = Color{ 200, 59, 0, 200 };
-                DrawText("Remaining quota: ", screenWidth - 250, 20, 20, quotaCol);
-
-                DrawText(HQ->isQuotaComplete ? "Complete" : (std::to_string(HQ->quota - HQ->collectedQuota) + " kg").c_str(), screenWidth - 250, 40, 50, quotaCol);
-
-            }
+            
         }
         
         

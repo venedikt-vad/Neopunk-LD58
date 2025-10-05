@@ -7,6 +7,7 @@ MultiInstrument::MultiInstrument() {}
 MultiInstrument::MultiInstrument(std::initializer_list < std::string > paths) {
     for (const auto & path: paths) {
         Sound sound = LoadSound(path.c_str());
+        SetSoundVolume(sound, 0.7f);
         sounds.insert({
             path,
             sound

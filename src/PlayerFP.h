@@ -89,12 +89,17 @@ class PlayerFP {
         
         PlayerFP(Vector3 loc, int weight = 0, int health = 100);
 
-        ~PlayerFP() {};
+        ~PlayerFP();
 
         PlayerFP(PlayerFP const&) = delete;
 
         PlayerFP& operator= (PlayerFP const&) = delete;
 
         MultiInstrument* runSound;
+        Sound musicBg;
+        Sound musicMain;
+        Sound musicDrums;
+
+        const int maxHp = 100;
     };
 
