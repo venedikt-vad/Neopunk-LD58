@@ -78,11 +78,11 @@ class PlayerFP {
 
         void HaveDamage(int damage);
 
-        void deathPlayer();
+        void DeathPlayer();
         
         void AddObjToInventory(int i);
 
-        float getBackpackPercent();
+        float GetBackpackPercent();
 
     private:
         PlayerFP(int weight = 0, int health = 100);

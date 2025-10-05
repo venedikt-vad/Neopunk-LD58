@@ -121,6 +121,14 @@ int main(void) {
     enemy = new EnemyTV();
     enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
+    laser = new Laser();
+    laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI/3,PI/3,PI/3), { 1,1,1 } });
+
+    mine = new Mine();
+    mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
+    
+    HQ = new HQ_InteractionPoint({ Vector3Zeros, QuaternionIdentity(), Vector3Ones});
+
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -357,6 +365,21 @@ static void UpdateGame(void) {
 
                     }
                 }
+            }
+
+            //Backpack HUD
+            {
+                const Color backpackCol = Color{ 200, 189, 0, 200 };
+                const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
+
+                DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
+                DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
+                DrawRectangleLinesEx(backpackRec, 5, backpackCol);
+                DrawRectangle(backpackRec.x,
+                    backpackRec.y + (backpackRec.height * (1 - player.GetBackpackPercent())),
+                    backpackRec.width, backpackRec.height * player.GetBackpackPercent(),
+                    backpackCol);
+            }
 
             
         }
