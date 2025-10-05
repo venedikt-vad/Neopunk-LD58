@@ -1,5 +1,9 @@
 #include "MapGenerator.h"
+
 #include "PlayerFP.h"
+#include "ObjectManager.h"
+#include "Collision\CollisionManager.h"
+
 
 MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     LM = LightM;
@@ -49,6 +53,9 @@ void MapGenerator::Generate(int size){
     L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 }; L.intensity = 15;
     L.direction = Vector3UnitZ * -1;
 
+    Model pickableM = LoadModel("resources/UnitCube.obj");
+    CollisionManager& cMngr = CollisionManager::Instance();
+
     for (size_t x = 0; x < size; x++) {
         std::vector<int> v;
 
@@ -60,9 +67,28 @@ void MapGenerator::Generate(int size){
                 L.position = v + pos;
                 LM->Add(L);
             }
-            
         }
         mapTiles.push_back(v);
+    }
+
+    vec3 vecOffs = { MAP_TILE_SIZE - 10, MAP_TILE_SIZE - 10, 0 };
+    //Filling created tiles
+    for (size_t x = 0; x < size; x++) {
+        for (size_t y = 0; y < size; y++) {
+
+            vec3 pos = { x * MAP_TILE_SIZE,y * MAP_TILE_SIZE,0 };
+
+            for (size_t i = 0; i < 5; i++) {
+                vec3 v = Vector3RandomInVolume({ MAP_TILE_SIZE - 20,MAP_TILE_SIZE - 20,30 }) - vecOffs;
+                //vec3 v = {0,0, 30};
+                Ray r = { pos + v, Vector3UnitZ*-1 };
+                RayCollision c = cMngr.GetRayCollision(r, true);
+                if (c.hit && (Vector3DotProduct(Vector3UnitZ, c.normal)>0.6)) {
+                    pickables.push_back(new PickableObject(pickableM, { c.point, QuaternionFromEuler(PI / 2,0,0), Vector3Ones }, KEY_E));
+                }
+
+            }
+        }
     }
 
 }
@@ -94,8 +120,15 @@ void MapGenerator::DrawTile(int x, int y) {
 }
 
 void MapGenerator::ClearGenData() {
-    mapTiles.empty();
+    mapTiles.clear();
     LM->Clear();
+
+    ObjectManager& objManager = ObjectManager::Instance();
+
+    for (PickableObject* o : pickables) {
+        objManager.Delete(o);
+    }
+    pickables.clear();
 }
 
 MeshMatrix MapGenerator::GetMapTileAtLocation(vec3 loc){

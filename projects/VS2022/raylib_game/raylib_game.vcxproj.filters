@@ -35,6 +35,8 @@
     <ClCompile Include="..\..\..\src\InteractiveObject.cpp" />
     <ClCompile Include="..\..\..\src\PickableObject.cpp" />
     <ClCompile Include="..\..\..\src\Enemies\EnemyTV.cpp" />
+    <ClCompile Include="..\..\..\src\Obtacles\Laser.cpp" />
+    <ClCompile Include="..\..\..\src\Obtacles\Mine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -76,6 +78,8 @@
     <ClInclude Include="..\..\..\src\InteractiveObject.h" />
     <ClInclude Include="..\..\..\src\PickableObject.h" />
     <ClInclude Include="..\..\..\src\Enemies\EnemyTV.h" />
+    <ClInclude Include="..\..\..\src\Obtacles\Laser.h" />
+    <ClInclude Include="..\..\..\src\Obtacles\Mine.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

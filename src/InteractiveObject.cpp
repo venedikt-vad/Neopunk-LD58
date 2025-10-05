@@ -1,6 +1,7 @@
 #include "InteractiveObject.h"
 #include "Collision/CollisionManager.h"
 #include <string>
+#include "PlayerFP.h"
 
 void InteractiveObject::Interactive() {
 	PlayerFP& player = PlayerFP::Instance();
@@ -10,7 +11,7 @@ void InteractiveObject::Interactive() {
 	rangeToObject = Vector3Length(rangeVector);
 
 	if (rangeToObject < 5
-		&& (Vector3DotProduct(Vector3Normalize(rayCameraPlayer.position - rayCameraPlayer.direction), Vector3Normalize(rangeVector)) > 0.8)) {
+		&& (Vector3DotProduct(Vector3Normalize(rayCameraPlayer.direction*-1), Vector3Normalize(rangeVector)) > 0.8)) {
 		if (IsKeyDown(KEY_E)) {
 			ResultInteract();
 		}
@@ -38,13 +39,13 @@ InteractiveObject::InteractiveObject() {
 	objModel.materials[0] = LoadMaterialDefault();
 	objModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("resources/cubicmap_atlas.png");
 
-	objectTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } };
+	objectTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 1,1,1 } };
 	
-	objMatrix = TransformToMatrix(objectTransform);
-	objModel.transform = objMatrix;
+	//objMatrix = TransformToMatrix(objectTransform);
+	objModel.transform = TransformToMatrix(objectTransform);
 }
 
-InteractiveObject::InteractiveObject(Model model, Matrix matrix, Transform transform, int interactiveKey) : Object(transform)  {
+InteractiveObject::InteractiveObject(Model model, Transform transform, int interactiveKey) : Object(transform)  {
 	
 	int usedKey = interactiveKey;
 	rangeToObject = std::numeric_limits<float>::infinity();;
@@ -53,11 +54,6 @@ InteractiveObject::InteractiveObject(Model model, Matrix matrix, Transform trans
 	Ray rayCameraPlayer = player.CameraRay();
 	
 	objModel = model;
-	objMatrix = matrix;
-	
-
-	objModel.transform = objMatrix;
-
 }
 
 InteractiveObject::~InteractiveObject() {
@@ -65,6 +61,7 @@ InteractiveObject::~InteractiveObject() {
 }
 
 void InteractiveObject::DrawObject() {
+	objModel.transform = TransformToMatrix(objectTransform);
 	DrawModel(objModel, Vector3Zero(), 1.f, WHITE);
 }
 

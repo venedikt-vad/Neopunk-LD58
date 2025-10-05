@@ -367,6 +367,8 @@
     <ClCompile Include="..\..\..\src\MapGenerator\MapGenerator.cpp" />
     <ClCompile Include="..\..\..\src\Object.cpp" />
     <ClCompile Include="..\..\..\src\ObjectManager.cpp" />
+    <ClCompile Include="..\..\..\src\Obtacles\Laser.cpp" />
+    <ClCompile Include="..\..\..\src\Obtacles\Mine.cpp" />
     <ClCompile Include="..\..\..\src\Particles\Particle.cpp" />
     <ClCompile Include="..\..\..\src\PickableObject.cpp" />
     <ClCompile Include="..\..\..\src\PlayerFP.cpp" />
@@ -389,6 +391,8 @@
     <ClInclude Include="..\..\..\src\MapGenerator\MapGenerator.h" />
     <ClInclude Include="..\..\..\src\Object.h" />
     <ClInclude Include="..\..\..\src\ObjectManager.h" />
+    <ClInclude Include="..\..\..\src\Obtacles\Laser.h" />
+    <ClInclude Include="..\..\..\src\Obtacles\Mine.h" />
     <ClInclude Include="..\..\..\src\Particles\Particle.h" />
     <ClInclude Include="..\..\..\src\Particles\Emitter.h" />
     <ClInclude Include="..\..\..\src\PickableObject.h" />

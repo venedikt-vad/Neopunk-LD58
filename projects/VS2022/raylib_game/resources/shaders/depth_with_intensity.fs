@@ -283,7 +283,7 @@ void main() {
 
     // Fog
     float fogStart = 20.0;
-    float fogEnd   = 200.0;
+    float fogEnd   = 100.0;
     vec3  fogColor = vec3(0.0);
     float dist = length(viewPos - fragPosition);
     float depth = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);

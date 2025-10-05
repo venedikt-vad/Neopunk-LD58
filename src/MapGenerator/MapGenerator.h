@@ -6,6 +6,8 @@
 #include "VVADExtras.h"
 #include "Lights\LightManager.h"
 
+#include "PickableObject.h"
+
 #define MAP_TILE_SIZE 90.f
 
 // Define the custom comparator for vec3 (Vector3)
@@ -49,4 +51,6 @@ private:
 	std::vector<std::set<vec3, Vec3Comparator>> lights;
 
 	LightManager* LM;
+
+	std::vector<PickableObject*> pickables;
 };

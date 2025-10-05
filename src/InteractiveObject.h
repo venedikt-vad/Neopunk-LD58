@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "Object.h"
-#include "PlayerFP.h"
 
 //Class of the interaction object, when located nearby
 class InteractiveObject : public Object {
@@ -20,19 +19,16 @@ public:
 
 	InteractiveObject();
 
-	InteractiveObject(Model model, Matrix matrix, Transform transform, int interactiveKey = KEY_E);
+	InteractiveObject(Model model, Transform transform, int interactiveKey = KEY_E);
 
 	~InteractiveObject();
 
 
 protected:
-
 	int usedKey;
 
 	Ray rayCameraPlayer;
 	float rangeToObject;
 
 	Model objModel;
-	
-	Matrix objMatrix;
 };

@@ -50,19 +50,17 @@ Font font = { 0 };
 Music music = { 0 };
 Sound fxCoin = { 0 };
 
-
-Model modelMap;
-Model modelTV;
-Matrix mapMatrix;
-
 Shader sh1;
 LightManager* gLightMgr = nullptr;
+MapGenerator* map;
+
+
+Model modelTV;
 
 EnemyTV* enemy;
 
 Laser* laser;
 Mine* mine;
-MapGenerator* map;
 
 Texture2D texture;
 Material mat;
@@ -101,20 +99,21 @@ int main(void) {
     //SetMusicVolume(music, 1.0f);
     //PlayMusicStream(music);
 
-    ObjectManager& objManager = ObjectManager::Instance();
-
-    interactiveObjectTest = new PickableObject(LoadModel("resources/UnitCube.obj"), TransformToMatrix({ { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }), { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI / 2,0,0), { 3,3,3 } }, KEY_E);
-    
-
     sh1 = LoadShader(TextFormat("resources/shaders/shadowmap.vs"), TextFormat("resources/shaders/depth_with_intensity.fs"));
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
-    
 
-    //modelMap = LoadModel("resources/TestMap.obj");
+    texture = LoadTexture("resources/cubicmap_atlas.png");    // Load placeholder texture
+    mat = LoadMaterialDefault();
+    mat.shader = sh1;
+
+    ObjectManager& objManager = ObjectManager::Instance();
+    
+    //interactiveObjectTest = new PickableObject(LoadModel("resources/UnitCube.obj"), { { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI / 2,0,0), { 0.1,0.1,0.1 } }, KEY_E);
+
     modelTV = LoadModel("resources/TV.obj");
     modelTV.transform = TransformToMatrix({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(0,0,0), { 1,1,1 } });
 
-    enemy = new EnemyTV();
+    //enemy = new EnemyTV();
     // enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
     laser = new Laser();
@@ -122,23 +121,10 @@ int main(void) {
 
     mine = new Mine();
     mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
-
-    texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
-
-    mat = LoadMaterialDefault();
-    mat.shader = sh1;
-    //modelMap.materials[0] = mat;
-    //modelMap.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
-
-    //Transform mapTransform = { { 0.f, 0.f, 3.f }, QuaternionFromEuler(PI/2,0,0), { 3,3,3 } };
     
-
-    //cMngr = new CollisionManager(modelMap.meshes[0], mapTransform);
-
-    //mapMatrix = TransformToMatrix(mapTransform);//MakeTransformMatrix({ 0.f, 0.f, 3.f }, { 90,0,0 }, { 3,3,3 });//MatrixMultiply(MatrixMultiply(matScale, matRotation), matTranslation);
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
-    float ambientValues[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    float ambientValues[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
     SetShaderValue(sh1, ambientLoc, ambientValues, SHADER_UNIFORM_VEC4);
     
     gLightMgr = new LightManager(sh1);
@@ -157,7 +143,7 @@ int main(void) {
         pt1.spriteOrigin = { .5,0 };
     }
     em1 = new Emitter<Particle>(pt1, { 15,3,1.5 }, { 15,0,0 }, true);
-
+    //em1->spawn_count = 20;
 
     ParticleParams pt2; {
         pt2.tex = texture;
@@ -175,13 +161,9 @@ int main(void) {
     em2->spawn_count = 15;
     em2->initial_velocity = 2;
 
-    //em1 = new Emitter<Particle>(pt1, { 15,0,1.5 }, { 15,0,0 }, false);
-    //em1->spawn_count = 20;
     Transform doorTransform = { { 23.f, 9.f, 3.f }, QuaternionIdentity(), {1,6,2}};
 
     door1 = new SimpleDoor(doorTransform);
-
-    
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateGame, 60, 1);
@@ -229,7 +211,6 @@ static void UpdateGame(void) {
 
 
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player.camera.position, SHADER_UNIFORM_VEC3);
-    //if(IsKeyPressed(KEY_E))em1->SpawnParticles();
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
@@ -243,9 +224,7 @@ static void UpdateGame(void) {
     edit.angle = fmodf((float)GetTime(), 1.0f) * 45.f;
 
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
-    //UpdateLightsArray(sh1, lights, player->camera);
 
-    enemy->Update(1);
     objManager.UpdateObjects(d);
 
     // Draw
@@ -266,17 +245,10 @@ static void UpdateGame(void) {
 
             door1->Draw(mat);
 
-            enemy->DrawObject();
             laser->DrawObject();
             if (mine != nullptr) {
                 mine->DrawObject();
             }
-
-            /*Ray gravRay = { { 48, -2, 2 }, {0,0,-1} };
-            SphereTraceCollision gravCollision = cMngr->GetSphereCollision(gravRay, .1f);
-            DrawSphere(gravRay.position, .1f, Color{ 230, 41, 55, 255 });
-            DrawSphere(gravCollision.point, .1f, Color{ 0, 231, 55, 255 });*/
-
 
             //DrawBillboardPro(player->camera, texture, GetTextureRectangle(texture), { 20,5,1 }, GetCameraUp(player->camera), { 1,1 }, {0,0}, 0, WHITE);
             //DrawCubeV(player->CameraRay().position + player->CameraRay().direction*0.1, { 0.001,0.001,0.001 }, RED);

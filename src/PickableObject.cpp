@@ -2,6 +2,7 @@
 #include "Collision/CollisionManager.h"
 #include "ObjectManager.h"
 #include "Object.h"
+#include "PlayerFP.h"
 
 #include <string>
 
@@ -20,7 +21,7 @@ PickableObject::PickableObject() {
 	weightObject = 1;
 }
 
-PickableObject::PickableObject(Model model, Matrix matrix, Transform transform, int interactiveKey) : InteractiveObject(model, matrix, transform, interactiveKey) {
+PickableObject::PickableObject(Model model, Transform transform, int interactiveKey) : InteractiveObject(model,  transform, interactiveKey) {
 	//TODO
 }
 

@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "InteractiveObject.h"
-#include "PlayerFP.h"
 
 //Class for an object to be lifted during interaction
 class PickableObject : public InteractiveObject {
@@ -11,7 +10,7 @@ public:
 
 	PickableObject();
 
-	PickableObject(Model model, Matrix matrix, Transform transform, int interactiveKey = KEY_E);
+	PickableObject(Model model, Transform transform, int interactiveKey = KEY_E);
 
 	~PickableObject();
 
