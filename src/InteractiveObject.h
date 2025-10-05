@@ -19,7 +19,7 @@ public:
 
 	InteractiveObject();
 
-	InteractiveObject(Model model, Transform transform, int interactiveKey = KEY_E);
+	InteractiveObject(Model model, Transform transform, int interactiveKey = KEY_E, bool hasModel = true);
 
 	~InteractiveObject();
 
@@ -30,5 +30,6 @@ protected:
 	Ray rayCameraPlayer;
 	float rangeToObject;
 
+	bool drawModel;
 	Model objModel;
 };

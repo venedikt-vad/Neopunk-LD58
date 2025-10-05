@@ -41,6 +41,7 @@
 #include "Enemies/EnemyTV.h"
 #include "Obtacles/Laser.h"
 #include "Obtacles/Mine.h"
+#include "HQ_InteractionPoint.h"
 
 // using namespace VLV;
 //----------------------------------------------------------------------------------
@@ -54,6 +55,7 @@ Shader sh1;
 LightManager* gLightMgr = nullptr;
 MapGenerator* map;
 
+HQ_InteractionPoint* HQ;
 
 Model modelTV;
 
@@ -122,6 +124,8 @@ int main(void) {
     mine = new Mine();
     mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
     
+    HQ = new HQ_InteractionPoint({ Vector3Zeros, QuaternionIdentity(), Vector3Ones});
+
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
     float ambientValues[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -280,7 +284,7 @@ static void UpdateGame(void) {
                 backpackCol);
         }
 
-        //DrawHomeLocation
+        //DrawHomeLocation HUD
         {
             vec3 homeLoc = Vector3Zeros;
 
@@ -289,11 +293,19 @@ static void UpdateGame(void) {
                 vec2 coord = GetWorldToScreen(homeLoc, player.camera);
                 Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
                 DrawRectangleLinesEx(homeRec, 5, homeCol);
-                std::string homeStr = "Home " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
+                std::string homeStr = "Home/HQ " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
                 DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
             }
         }
 
+        //quota HUD
+        {
+            const Color quotaCol = Color{ 200, 59, 0, 200 };
+            DrawText("Remaining quota: ", screenWidth - 250, 20, 20, quotaCol);
+            
+            DrawText(HQ->isQuotaComplete?"Complete":(std::to_string(HQ->quota - HQ->collectedQuota) + " kg").c_str(), screenWidth - 250, 40, 50, quotaCol);
+
+        }
         
 
         //screenWidth

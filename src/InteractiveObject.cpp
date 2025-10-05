@@ -45,15 +45,15 @@ InteractiveObject::InteractiveObject() {
 	objModel.transform = TransformToMatrix(objectTransform);
 }
 
-InteractiveObject::InteractiveObject(Model model, Transform transform, int interactiveKey) : Object(transform)  {
-	
+InteractiveObject::InteractiveObject(Model model, Transform transform, int interactiveKey, bool hasModel) : Object(transform)  {
 	int usedKey = interactiveKey;
 	rangeToObject = std::numeric_limits<float>::infinity();;
 
 	PlayerFP& player = PlayerFP::Instance();
 	Ray rayCameraPlayer = player.CameraRay();
 	
-	objModel = model;
+	drawModel = hasModel;
+	if(drawModel)objModel = model;
 }
 
 InteractiveObject::~InteractiveObject() {
@@ -61,8 +61,11 @@ InteractiveObject::~InteractiveObject() {
 }
 
 void InteractiveObject::DrawObject() {
-	objModel.transform = TransformToMatrix(objectTransform);
-	DrawModel(objModel, Vector3Zero(), 1.f, WHITE);
+	if (drawModel) {
+		objModel.transform = TransformToMatrix(objectTransform);
+		DrawModel(objModel, Vector3Zero(), 1.f, WHITE);
+	}
+	
 }
 
 void InteractiveObject::HideObject() {
