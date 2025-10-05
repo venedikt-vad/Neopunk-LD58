@@ -67,6 +67,9 @@ Laser* laser;
 Mine* mine;
 
 Texture2D texture;
+
+Texture2D noizeTexture;
+
 Material mat;
 Material mat1;
 Material mat2;
@@ -107,6 +110,8 @@ int main(void) {
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load placeholder texture
+    noizeTexture = LoadTexture("resources/noise.png");
+
     mat = LoadMaterialDefault();
     mat.shader = sh1;
 
@@ -305,6 +310,20 @@ static void UpdateGame(void) {
                     }
                     
                 } else {
+                    //Player noisze tex
+                    {
+                        int x = GetRandomValue(0, 1000);
+                        unsigned char a = player.noiseAmount * 100;
+                        DrawTexture(noizeTexture, x, 0, Color{ 255, 255, 255, a });
+                        DrawTexture(noizeTexture, x-1920, 0, Color{ 255, 255, 255, a });
+                    }
+
+                    //Player damage tint
+                    {
+                        unsigned char a = player.noiseAmount * 100 * (1.f - Clamp01(GetTime() - player.lastDamageTime));
+                        DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 230, 41, 55, a });
+                    }
+
                     //Interaction HUD
                     {
                         if (player.drawInteraction) {
