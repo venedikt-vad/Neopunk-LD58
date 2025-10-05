@@ -269,43 +269,54 @@ static void UpdateGame(void) {
         DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
 
         //HUD
-
-        //Backpack HUD
         {
-            const Color backpackCol = Color{ 200, 189, 0, 200 };
-            const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
+            //Interaction HUD
+            {
+                if (player.drawInteraction) {
+                    const Color interactCol = Color{ 255, 255, 255, 200 };
+                    const Rectangle interactRec = { screenWidth / 2 - 20, screenHeight / 2 - 20, 40, 40 };
+                    DrawRectangleLinesEx(interactRec, 10, interactCol);
+                }
+            }
 
-            DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
-            DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
-            DrawRectangleLinesEx(backpackRec, 5, backpackCol);
-            DrawRectangle(backpackRec.x,
-                backpackRec.y + (backpackRec.height * (1-player.getBackpackPercent())),
-                backpackRec.width, backpackRec.height * player.getBackpackPercent(),
-                backpackCol);
-        }
+            //Backpack HUD
+            {
+                const Color backpackCol = Color{ 200, 189, 0, 200 };
+                const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
 
-        //DrawHomeLocation HUD
-        {
-            vec3 homeLoc = Vector3Zeros;
+                DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
+                DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
+                DrawRectangleLinesEx(backpackRec, 5, backpackCol);
+                DrawRectangle(backpackRec.x,
+                    backpackRec.y + (backpackRec.height * (1 - player.getBackpackPercent())),
+                    backpackRec.width, backpackRec.height * player.getBackpackPercent(),
+                    backpackCol);
+            }
 
-            if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
-                const Color homeCol = Color{ 0, 229, 0, 200 };
-                vec2 coord = GetWorldToScreen(homeLoc, player.camera);
-                Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
-                DrawRectangleLinesEx(homeRec, 5, homeCol);
-                std::string homeStr = "Home/HQ " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
-                DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
+            //DrawHomeLocation HUD
+            {
+                vec3 homeLoc = Vector3Zeros;
+
+                if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
+                    const Color homeCol = Color{ 0, 229, 0, 200 };
+                    vec2 coord = GetWorldToScreen(homeLoc, player.camera);
+                    Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
+                    DrawRectangleLinesEx(homeRec, 5, homeCol);
+                    std::string homeStr = "Home/HQ " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
+                    DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
+                }
+            }
+
+            //quota HUD
+            {
+                const Color quotaCol = Color{ 200, 59, 0, 200 };
+                DrawText("Remaining quota: ", screenWidth - 250, 20, 20, quotaCol);
+
+                DrawText(HQ->isQuotaComplete ? "Complete" : (std::to_string(HQ->quota - HQ->collectedQuota) + " kg").c_str(), screenWidth - 250, 40, 50, quotaCol);
+
             }
         }
-
-        //quota HUD
-        {
-            const Color quotaCol = Color{ 200, 59, 0, 200 };
-            DrawText("Remaining quota: ", screenWidth - 250, 20, 20, quotaCol);
-            
-            DrawText(HQ->isQuotaComplete?"Complete":(std::to_string(HQ->quota - HQ->collectedQuota) + " kg").c_str(), screenWidth - 250, 40, 50, quotaCol);
-
-        }
+        
         
 
         //screenWidth

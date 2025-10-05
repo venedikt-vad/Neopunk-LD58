@@ -53,6 +53,8 @@ class PlayerFP {
 
         Vector2 sensitivity = { 0.001f, 0.001f };
 
+        bool drawInteraction = false;
+
         //float playerSize = 0.3f;
         //float floorAngle = 0.8f;
 

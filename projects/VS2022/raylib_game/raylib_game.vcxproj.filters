@@ -38,6 +38,7 @@
     <ClCompile Include="..\..\..\src\Obtacles\Laser.cpp" />
     <ClCompile Include="..\..\..\src\Obtacles\Mine.cpp" />
     <ClCompile Include="..\..\..\src\HQ_InteractionPoint.cpp" />
+    <ClCompile Include="..\..\..\src\bed_InteractionPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\VVADExtras.h" />
@@ -82,6 +83,7 @@
     <ClInclude Include="..\..\..\src\Obtacles\Laser.h" />
     <ClInclude Include="..\..\..\src\Obtacles\Mine.h" />
     <ClInclude Include="..\..\..\src\HQ_InteractionPoint.h" />
+    <ClInclude Include="..\..\..\src\bed_InteractionPoint.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />

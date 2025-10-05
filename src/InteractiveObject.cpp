@@ -14,6 +14,8 @@ void InteractiveObject::Interactive() {
 		&& (Vector3DotProduct(Vector3Normalize(rayCameraPlayer.direction*-1), Vector3Normalize(rangeVector)) > 0.8)) {
 		if (IsKeyDown(KEY_E)) {
 			ResultInteract();
+		} else {
+			player.drawInteraction = true;
 		}
 	}
 }

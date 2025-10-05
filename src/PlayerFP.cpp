@@ -50,6 +50,8 @@
 
     void PlayerFP::Update(float d) {
 
+        drawInteraction = false;
+
         CollisionManager& cMngr = CollisionManager::Instance();
 
         // Inputs

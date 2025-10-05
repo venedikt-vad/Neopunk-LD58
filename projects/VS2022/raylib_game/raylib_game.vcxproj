@@ -360,6 +360,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\bed_InteractionPoint.cpp" />
     <ClCompile Include="..\..\..\src\Collision\CollisionManager.cpp" />
     <ClCompile Include="..\..\..\src\Enemies\EnemyTV.cpp" />
     <ClCompile Include="..\..\..\src\HQ_InteractionPoint.cpp" />
@@ -384,6 +385,7 @@
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\bed_InteractionPoint.h" />
     <ClInclude Include="..\..\..\src\Collision\CollisionManager.h" />
     <ClInclude Include="..\..\..\src\Enemies\EnemyTV.h" />
     <ClInclude Include="..\..\..\src\HQ_InteractionPoint.h" />
