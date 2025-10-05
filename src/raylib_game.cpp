@@ -115,8 +115,8 @@ int main(void) {
     modelTV = LoadModel("resources/TV.obj");
     modelTV.transform = TransformToMatrix({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(0,0,0), { 1,1,1 } });
 
-    //enemy = new EnemyTV();
-    // enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
+    enemy = new EnemyTV();
+    enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
     laser = new Laser();
     laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI/3,PI/3,PI/3), { 1,1,1 } });
