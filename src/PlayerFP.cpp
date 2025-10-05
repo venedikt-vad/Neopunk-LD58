@@ -335,3 +335,7 @@
     {
         invetoryWeight += i;
     }
+
+    float PlayerFP::getBackpackPercent(){
+        return (float)invetoryWeight / (float)invetory_MAX;
+    }

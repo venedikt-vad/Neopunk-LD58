@@ -70,7 +70,8 @@ class PlayerFP {
 
         Ray CameraRay();
 
-        int invetoryWeight;
+        int invetoryWeight = 0;
+        int invetory_MAX = 20;
         int hpPlayer;
 
         void HaveDamage(int damage);
@@ -79,7 +80,7 @@ class PlayerFP {
         
         void AddObjToInventory(int i);
 
-
+        float getBackpackPercent();
 
     private:
         PlayerFP(int weight = 0, int health = 100);

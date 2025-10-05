@@ -262,6 +262,27 @@ static void UpdateGame(void) {
         Ray camRay = player.CameraRay();
         DrawText(Vec3ToString(player.position).c_str(), 10, 50, 30, RED);
         DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
+
+
+        //HUD
+
+        //Backpack HUD
+        {
+            const Color backpackCol = Color{ 200, 189, 0, 200 };
+            const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
+
+            DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
+            DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
+            DrawRectangleLinesEx(backpackRec, 5, backpackCol);
+            DrawRectangle(backpackRec.x,
+                backpackRec.y + (backpackRec.height * (1-player.getBackpackPercent())),
+                backpackRec.width, backpackRec.height * player.getBackpackPercent(),
+                backpackCol);
+        }
+        
+
+        //screenWidth
+        //screenHeight
     }
     EndDrawing();
     //----------------------------------------------------------------------------------

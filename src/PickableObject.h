@@ -14,6 +14,6 @@ public:
 
 	~PickableObject();
 
-	int weightObject;
+	int weightObject = 1;
 
 };
