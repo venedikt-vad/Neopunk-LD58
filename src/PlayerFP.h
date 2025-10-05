@@ -55,6 +55,10 @@ class PlayerFP {
 
         bool drawInteraction = false;
 
+        float noiseAmount = 0;
+
+        double lastDamageTime = -12313;
+
         //float playerSize = 0.3f;
         //float floorAngle = 0.8f;
 

@@ -356,16 +356,14 @@
 
             Vector3 right = Vector3Normalize(Vector3CrossProduct(pitch, up));
 
-            if (forward != 0)
-            {
+            if (forward != 0) {
                 camera->position = Vector3Add(camera->position, Vector3Scale(right, swayX));
                 camera->position.z += swayY;
             }
 
-            if (side != 0)
-            {
+            if (side != 0) {
                 float rollZ = -side * rollAmount; 
-                camera->up = Vector3RotateByAxisAngle(camera->up, pitch, rollZ);
+                camera->up = Vector3Lerp(camera->up, Vector3RotateByAxisAngle(camera->up, pitch, rollZ), 0.2);
             }
         }
 
@@ -389,7 +387,8 @@
 
     void PlayerFP::HaveDamage(int damage) {
         hpPlayer -= damage;
-        std::cout << hpPlayer << std::endl;
+        lastDamageTime = GetTime();
+        //std::cout << hpPlayer << std::endl;
     }
 
     void PlayerFP::DeathPlayer() {

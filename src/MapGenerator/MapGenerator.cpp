@@ -3,7 +3,7 @@
 #include "PlayerFP.h"
 #include "ObjectManager.h"
 #include "Collision\CollisionManager.h"
-
+#include "Obtacles\Mine.h"
 
 MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     LM = LightM;
@@ -14,7 +14,7 @@ MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     mat = LoadMaterialDefault();
     mat.shader = sh;
 
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 5; i++) {
         std::string path = "resources/MapTiles/tileModel";
         path += std::to_string(i);
         path += ".obj";
@@ -101,6 +101,21 @@ void MapGenerator::Generate(int size){
                 }
 
             }
+
+            for (size_t i = 0; i < 3; i++) {
+                vec3 v = Vector3RandomInVolume({ MAP_TILE_SIZE - 20,MAP_TILE_SIZE - 20,30 }) - vecOffs;
+                //vec3 v = {0,0, 30};
+                Ray r = { pos + v, Vector3UnitZ * -1 };
+                RayCollision c = cMngr.GetRayCollision(r, true);
+                if (c.hit && (Vector3DotProduct(Vector3UnitZ, c.normal) > 0.6)) {
+                    Mine* mine = new Mine();
+                    //c.point += {0.f, 0.f, 0.5f};
+                    mine->SetTranform({ c.point, QuaternionIdentity(), Vector3Ones});
+                }
+
+            }
+
+            
         }
     }
 

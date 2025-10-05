@@ -67,6 +67,9 @@ Laser* laser;
 Mine* mine;
 
 Texture2D texture;
+
+Texture2D noizeTexture;
+
 Material mat;
 Material mat1;
 Material mat2;
@@ -107,6 +110,8 @@ int main(void) {
     sh1.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(sh1, "viewPos");
 
     texture = LoadTexture("resources/cubicmap_atlas.png");    // Load placeholder texture
+    noizeTexture = LoadTexture("resources/noise.png");
+
     mat = LoadMaterialDefault();
     mat.shader = sh1;
 
@@ -149,7 +154,7 @@ int main(void) {
     laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI / 3,PI / 3,PI / 3), { 1,1,1 } });
 
     mine = new Mine();
-    mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
+    mine->SetTranform({ { 90, 120, .4f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
 
     HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
     bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
@@ -256,6 +261,7 @@ static void UpdateGame(void) {
         
         BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
+            DrawCube({ 90,90,90 }, 3000, 3000, 3, BLACK);
             map->Draw();
             //DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             // DrawModel(modelTV, { 0.f, 0.f, 3.f }, 1.f, WHITE);
@@ -305,6 +311,20 @@ static void UpdateGame(void) {
                     }
                     
                 } else {
+                    //Player noisze tex
+                    {
+                        int x = GetRandomValue(0, 1000);
+                        unsigned char a = player.noiseAmount * 100;
+                        DrawTexture(noizeTexture, x, 0, Color{ 255, 255, 255, a });
+                        DrawTexture(noizeTexture, x-1920, 0, Color{ 255, 255, 255, a });
+                    }
+
+                    //Player damage tint
+                    {
+                        unsigned char a = player.noiseAmount * 100 * (1.f - Clamp01(GetTime() - player.lastDamageTime));
+                        DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 230, 41, 55, a });
+                    }
+
                     //Interaction HUD
                     {
                         if (player.drawInteraction) {
