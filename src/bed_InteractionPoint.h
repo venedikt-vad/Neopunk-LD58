@@ -15,6 +15,9 @@ public:
 
 	~bed_InteractionPoint();
 
+	bool dayEndscreen = false;
+	double dayEndscreenBeginTime = 0;
+
 private:
 	HQ_InteractionPoint* HQ;
 };

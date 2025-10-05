@@ -15,7 +15,7 @@ public:
 	~HQ_InteractionPoint();
 
 	int quota = 10;
-	bool isQuotaComplete = false;
+	bool isQuotaComplete = true;
 	int collectedQuota = 0;
 
 	void NewQuota();

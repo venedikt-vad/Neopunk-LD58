@@ -12,6 +12,8 @@ void bed_InteractionPoint::ResultInteract() {
 
 	if (HQ->isQuotaComplete) {
 		//END_DAY
+		dayEndscreen = true;
+		dayEndscreenBeginTime = GetTime();
 	}
 }
 

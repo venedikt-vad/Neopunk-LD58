@@ -14,7 +14,7 @@ MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     mat = LoadMaterialDefault();
     mat.shader = sh;
 
-    for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 4; i++) {
         std::string path = "resources/MapTiles/tileModel";
         path += std::to_string(i);
         path += ".obj";
@@ -55,14 +55,20 @@ void MapGenerator::Generate(int size){
     L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 40.f; L.angle = 20.f;  L.intensity = 15;
     L.direction = Vector3UnitZ * -1;
 
-    Model pickableM = LoadModel("resources/UnitCube.obj");
+    Model pickableM = LoadModel("resources/Hardware.obj");
     CollisionManager& cMngr = CollisionManager::Instance();
 
     for (size_t x = 0; x < size; x++) {
         std::vector<int> v;
 
         for (size_t y = 0; y < size; y++) {
-            v.push_back(GetRandomValue(0, mapElements.size() - 1));
+            if (x == 0 || y == 0 || x == (size - 1) || y == (size - 1)) {
+                v.push_back(1);
+            } else if (x == 1 && y == 1) {
+                v.push_back(0);
+            }else {
+                v.push_back(GetRandomValue(2, mapElements.size() - 1));
+            }
 
             vec3 pos = { x * MAP_TILE_SIZE,y * MAP_TILE_SIZE,0 };
             for (vec3 v : lights[v[y]]) {
@@ -98,6 +104,10 @@ void MapGenerator::Generate(int size){
         }
     }
 
+
+    PlayerFP& player = PlayerFP::Instance();
+    player.position = { 1 * MAP_TILE_SIZE,1 * MAP_TILE_SIZE,1 };
+
 }
 
 void MapGenerator::Draw() {
@@ -131,10 +141,7 @@ void MapGenerator::ClearGenData() {
     LM->Clear();
 
     ObjectManager& objManager = ObjectManager::Instance();
-
-    for (PickableObject* o : pickables) {
-        objManager.Delete(o);
-    }
+    objManager.Delete();
     pickables.clear();
 }
 
