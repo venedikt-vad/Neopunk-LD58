@@ -118,8 +118,8 @@ int main(void) {
     modelTV = LoadModel("resources/TV.obj");
     modelTV.transform = TransformToMatrix({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(0,0,0), { 1,1,1 } });
 
-    //enemy = new EnemyTV();
-    // enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
+    enemy = new EnemyTV();
+    enemy->SetTranform({ { 0.f, 0.f, 0.f }, QuaternionFromEuler(PI/2,0,0), { 1,1,1 } });
 
     // Ambient light level (some basic lighting)
     int ambientLoc = GetShaderLocation(sh1, "ambient");
@@ -228,6 +228,8 @@ static void UpdateGame(void) {
     //em1->Update(d);
     //em2->Update(d);
 
+    enemy->Update(d);
+
     door1->Update(d);
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
@@ -254,6 +256,8 @@ static void UpdateGame(void) {
             //em2->Draw(player.camera);
 
             objManager.DrawObjects();
+
+            enemy->DrawObject();
 
             door1->Draw(mat);
 

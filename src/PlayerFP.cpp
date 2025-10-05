@@ -10,6 +10,12 @@
     PlayerFP::PlayerFP(Vector3 loc, int weight, int health) : invetoryWeight(weight), hpPlayer(health) {
         Init(loc);
     }
+    PlayerFP::~PlayerFP() {
+        UnloadSound(musicBg);
+        UnloadSound(musicMain);
+        UnloadSound(musicDrums);
+        delete runSound;
+    }
 
     PlayerFP &PlayerFP::Instance() {
         static PlayerFP pFP;
@@ -31,7 +37,6 @@
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
 
-        hpPlayer = 1;
         invetoryWeight = NULL;
 
         runSound = new MultiInstrument({"resources/sounds/running2.wav",
@@ -52,6 +57,9 @@
                                         "resources/sounds/running17.wav",
                                         "resources/sounds/running18.wav",
                                         "resources/sounds/running19.wav"});
+        musicBg = LoadSound("resources/sounds/music.wav");
+        musicMain = LoadSound("resources/sounds/musicMain.wav");
+        musicDrums = LoadSound("resources/sounds/drums.wav");
 
         DisableCursor();
     }
@@ -254,6 +262,20 @@
             runSound->Stop();
         }
         runSound->Update();
+
+        if (!IsSoundPlaying(musicBg)) {
+            PlaySound(musicBg);
+        }
+        if (!IsSoundPlaying(musicMain)) {
+            PlaySound(musicMain);
+        }
+        if (!IsSoundPlaying(musicDrums)) {
+            PlaySound(musicDrums);
+        }
+
+        SetSoundVolume(musicDrums, 1.f - ((float)Clamp(hpPlayer, 0, maxHp)) / (float)maxHp);
+        SetSoundVolume(musicMain, (float)invetoryWeight / ((float)invetory_MAX / 2.f));
+        std::cout << invetoryWeight << std::endl;
 
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
