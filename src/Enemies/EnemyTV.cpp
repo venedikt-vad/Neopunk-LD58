@@ -1,5 +1,6 @@
 #include "EnemyTV.h"
 #include "PlayerFP.h"
+#include "Collision/CollisionManager.h"
 #include <iostream>
 #include <VVADExtras.h>
 
@@ -9,7 +10,11 @@ bool IsCameraLookingAtObject(Camera3D camera, Vector3 objectPosition, float thre
     Vector3 toObject = Vector3Normalize(Vector3Subtract(objectPosition, camera.position));
     float dot = Vector3DotProduct(cameraForward, toObject);
 
-    return (dot >= threshold);
+    CollisionManager& colManager = CollisionManager::Instance();
+
+    RayCollision flagObstruction = colManager.GetRayCollision(GetCameraRay(camera));
+
+    return (dot >= threshold && flagObstruction.distance > Vector3Length(objectPosition - camera.position));
 }
 
 EnemyTV::EnemyTV()
