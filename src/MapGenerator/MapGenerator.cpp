@@ -14,7 +14,7 @@ MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     mat = LoadMaterialDefault();
     mat.shader = sh;
 
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 5; i++) {
         std::string path = "resources/MapTiles/tileModel";
         path += std::to_string(i);
         path += ".obj";
