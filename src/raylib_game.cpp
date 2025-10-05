@@ -240,6 +240,12 @@ static void UpdateGame(void) {
 
     if (player.hpPlayer <= 0 && IsKeyPressed(KEY_R)) {
         player.hpPlayer = 100;
+
+        BeginDrawing();
+        DrawRectangle(0, 0, screenWidth, screenHeight, BLACK);
+        DrawText("LOADING...", screenWidth / 2 - 170, screenHeight / 2 + 40, 40, WHITE);
+        EndDrawing();
+
         map->Generate(8);
         HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
         bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
@@ -297,8 +303,8 @@ static void UpdateGame(void) {
 
         DrawFPS(10, 10);
         Ray camRay = player.CameraRay();
-        DrawText(Vec3ToString(player.position).c_str(), 10, 50, 30, RED);
-        DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
+        //DrawText(Vec3ToString(player.position).c_str(), 10, 50, 30, RED);
+        //DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
 
         //HUD
         {
@@ -312,9 +318,13 @@ static void UpdateGame(void) {
                     } else if (GetTime() - bed->dayEndscreenBeginTime < 6) {
                         DrawText("you hear the metal creaking\ncity continue to grow...", screenWidth / 2 - 220, screenHeight / 2 - 50, 40, WHITE);
                     } else {
+                        DrawText("LOADING...", screenWidth / 2 - 170, screenHeight / 2 + 40, 40, WHITE);
+
                         map->Generate(8);
                         HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
                         bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
+
+
                     }
                     
                 } else {
@@ -328,7 +338,7 @@ static void UpdateGame(void) {
 
                     //Player damage tint
                     {
-                        unsigned char a = player.noiseAmount * 100 * (1.f - Clamp01(GetTime() - player.lastDamageTime));
+                        unsigned char a =  100 * (1.f - Clamp01(GetTime() - player.lastDamageTime));
                         DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 230, 41, 55, a });
                     }
 

@@ -20,7 +20,7 @@ private:
     Vector3 endPos;
 
     Model model;
-    Sound3d* expSound;
+    static Sound3d* expSound;
     LM_Light light;
 
     bool isDestroy = false;

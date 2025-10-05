@@ -48,6 +48,7 @@ private:
 	int mapSize;
 	std::vector<std::vector<int>> mapTiles;
 	std::vector<Model> mapElements;
+	std::vector<Model> mapColliders;
 	std::vector<std::set<vec3, Vec3Comparator>> lights;
 
 	LightManager* LM;

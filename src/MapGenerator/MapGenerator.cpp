@@ -22,6 +22,12 @@ MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
         mapElements[mapElements.size() - 1].materials[0] = mat;
         mapElements[mapElements.size() - 1].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
+        path = "resources/MapTiles/tileCollider";
+        path += std::to_string(i);
+        path += ".obj";
+        mapColliders.push_back(LoadModel(path.c_str()));
+
+
         path = "resources/MapTiles/tileLights";
         path += std::to_string(i);
         path += ".obj"; 
@@ -55,7 +61,7 @@ void MapGenerator::Generate(int size){
     L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 40.f; L.angle = 20.f;  L.intensity = 15;
     L.direction = Vector3UnitZ * -1;
 
-    Model pickableM = LoadModel("resources/Hardware.obj");
+    static Model pickableM = LoadModel("resources/Hardware.obj");
     CollisionManager& cMngr = CollisionManager::Instance();
 
     for (size_t x = 0; x < size; x++) {
@@ -170,5 +176,5 @@ MeshMatrix MapGenerator::GetMapTileAtLocation(vec3 loc){
 
     Matrix mapMatrix = TransformToMatrix({ pos, QuaternionFromEuler(PI / 2, 0, 0), {1,1,1} });
 
-    return MeshMatrix({ mapElements[mapTiles[tileX][tileY]].meshes[0], mapMatrix });
+    return MeshMatrix({ mapColliders[mapTiles[tileX][tileY]].meshes[0], mapMatrix });
 }

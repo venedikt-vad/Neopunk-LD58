@@ -283,7 +283,6 @@
 
         SetSoundVolume(musicDrums, 1.f - ((float)Clamp(hpPlayer, 0, maxHp)) / (float)maxHp);
         SetSoundVolume(musicMain, (float)invetoryWeight / ((float)invetory_MAX / 2.f));
-        std::cout << invetoryWeight << std::endl;
 
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
