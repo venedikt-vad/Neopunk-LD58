@@ -154,7 +154,7 @@ int main(void) {
     laser->SetTranform({ { 1.f, 0.f, 1.f }, QuaternionFromEuler(PI / 3,PI / 3,PI / 3), { 1,1,1 } });
 
     mine = new Mine();
-    mine->SetTranform({ { 10.f, 0.f, 0.f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
+    mine->SetTranform({ { 90, 120, .4f }, QuaternionFromEuler(0, 0, 0), { 1,1,1 } });
 
     HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
     bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
@@ -261,6 +261,7 @@ static void UpdateGame(void) {
         
         BeginMode3D(player.camera);
         BeginShaderMode(sh1); {
+            DrawCube({ 90,90,90 }, 3000, 3000, 3, BLACK);
             map->Draw();
             //DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             // DrawModel(modelTV, { 0.f, 0.f, 3.f }, 1.f, WHITE);
