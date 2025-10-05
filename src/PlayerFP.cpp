@@ -14,6 +14,7 @@
         UnloadSound(musicBg);
         UnloadSound(musicMain);
         UnloadSound(musicDrums);
+        UnloadSound(hitSound);
         delete runSound;
     }
 
@@ -58,6 +59,7 @@
         musicBg = LoadSound("resources/sounds/music.wav");
         musicMain = LoadSound("resources/sounds/musicMain.wav");
         musicDrums = LoadSound("resources/sounds/drums.wav");
+        hitSound = LoadSound("resources/sounds/hit.mp3");
 
         DisableCursor();
     }
@@ -70,13 +72,21 @@
 
         // Inputs
         Vector2 mouseDelta = GetMouseDelta();
-        lookRotation.x -= mouseDelta.x * sensitivity.x;
-        lookRotation.y += mouseDelta.y * sensitivity.y;
 
-        int side = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
-        int forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
-        bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
-        bool jumpPressed = IsKeyPressed(KEY_SPACE);
+        int side = 0;
+        int forward = 0;
+        bool crouching = 0;
+        bool jumpPressed = 0;
+
+        if (hpPlayer > 0) {
+            side = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
+            forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
+            crouching = IsKeyDown(KEY_LEFT_CONTROL);
+            jumpPressed = IsKeyPressed(KEY_SPACE);
+
+            lookRotation.x -= mouseDelta.x * sensitivity.x;
+            lookRotation.y += mouseDelta.y * sensitivity.y;
+        }
 
         float playerHeight = GetCurrentPlayerHeight();
         vec3 posBeforeMovement = position;
@@ -370,9 +380,6 @@
 
         camera->target = Vector3Add(camera->position, pitch);
 
-
-
-
     }
 
     float PlayerFP::GetCurrentPlayerHeight()
@@ -386,8 +393,11 @@
     }
 
     void PlayerFP::HaveDamage(int damage) {
-        hpPlayer -= damage;
+        hpPlayer = Clamp(hpPlayer - damage, 0, 100);
         lastDamageTime = GetTime();
+        if (hpPlayer >= 0) {
+            PlaySound(hitSound);
+        }
         //std::cout << hpPlayer << std::endl;
     }
 

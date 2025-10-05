@@ -103,6 +103,7 @@ class PlayerFP {
         Sound musicBg;
         Sound musicMain;
         Sound musicDrums;
+        Sound hitSound;
 
         const int maxHp = 100;
     };

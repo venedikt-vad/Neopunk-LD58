@@ -237,6 +237,13 @@ static void UpdateGame(void) {
     SetShaderValue(sh1, sh1.locs[SHADER_LOC_VECTOR_VIEW], &player.camera.position, SHADER_UNIFORM_VEC3);
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
+
+    if (player.hpPlayer <= 0 && IsKeyPressed(KEY_R)) {
+        player.hpPlayer = 100;
+        map->Generate(8);
+        HQ = new HQ_InteractionPoint({ {90 + 11.9, 90 + 26.9, 2}, QuaternionIdentity(), Vector3Ones });
+        bed = new bed_InteractionPoint(HQ, { {90 + 20.3, 90 + 32.1, 2}, QuaternionIdentity(), Vector3Ones });
+    }
     
     //em1->Update(d);
     //em2->Update(d);
@@ -339,13 +346,31 @@ static void UpdateGame(void) {
                         const Color backpackCol = Color{ 200, 189, 0, 200 };
                         const Rectangle backpackRec = { 10, screenHeight - 210, 20, 200 };
 
+                        const Color hpCol = Color{ 200, 0, 0, 200 };
+                        const Rectangle hpRec = { screenWidth - 30, screenHeight - 210, 20, 200 };
+
                         DrawText("backpack", 40, screenHeight - 80, 20, backpackCol);
                         DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
+                        DrawText("health", screenWidth - 200, screenHeight - 80, 20, hpCol);
+                        DrawText((std::to_string(player.hpPlayer) + " hp").c_str(), screenWidth - 200, screenHeight - 60, 50, hpCol);
                         DrawRectangleLinesEx(backpackRec, 5, backpackCol);
                         DrawRectangle(backpackRec.x,
                             backpackRec.y + (backpackRec.height * (1 - player.GetBackpackPercent())),
                             backpackRec.width, backpackRec.height * player.GetBackpackPercent(),
                             backpackCol);
+
+                        DrawRectangleLinesEx(hpRec, 5, hpCol);
+                        DrawRectangle(
+                            hpRec.x,
+                            hpRec.y + (hpRec.height * (1 - (float)player.hpPlayer/(float)100)),
+                            hpRec.width,
+                            hpRec.height * ((float)player.hpPlayer/(float)100),
+                            hpCol);
+
+                        if (player.hpPlayer <= 0) {
+                            DrawText("YOU ARE DIED!", screenWidth/2 - 350, screenHeight/2 - 30, 68, hpCol);
+                            DrawText("Press R to restart game", screenWidth/2 - 350, screenHeight/2 + 30, 60, hpCol);
+                        }
                     }
 
                     //DrawHomeLocation HUD
