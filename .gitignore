@@ -81,3 +81,5 @@ android.*
 # Whitelist the resources folder - place this at the end
 !/projects/VS2022/raylib_game/resources/
 !/projects/VS2022/raylib_game/resources/**
+!/src/resources/
+!/src/resources/**
