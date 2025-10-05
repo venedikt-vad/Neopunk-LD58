@@ -8,9 +8,7 @@ void ObjectManager::Append(Object* obj) {
 }
 
 void ObjectManager::Delete() {
-	for (auto elem:objects) {
-		delete elem;
-	}
+	objects.clear();
 }
 
 void ObjectManager::Delete(Object* obj) {

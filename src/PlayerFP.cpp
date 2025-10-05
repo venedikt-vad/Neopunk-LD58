@@ -31,9 +31,6 @@
         UpdateCameraPos();
         UpdateCameraFPS(&camera);
 
-        hpPlayer = 1;
-        invetoryWeight = NULL;
-
         runSound = new MultiInstrument({"resources/sounds/running2.wav",
                                         "resources/sounds/running3.wav",
                                         "resources/sounds/running4.wav",
@@ -251,7 +248,7 @@
         UpdateCameraFPS(&camera);
     
         if (hpPlayer < 0) {
-            deathPlayer();
+            DeathPlayer();
         }
 }
 
@@ -311,7 +308,42 @@
         bobbing.y = fabsf(headCos * bobUp);
 
         camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
+         
+        //Camera shake when player walking
+        if (walkLerp > 0.01f) {
+
+            float swayAmount = 0.3f * walkLerp;
+            float rollAmount = 0.05f * walkLerp;
+            float swaySpeed = 1.0f;
+
+            float swayX = sinf(headTimer * PI * swaySpeed) * swayAmount;  
+            float swayY = fabsf(sinf(headTimer * PI * swaySpeed)) * 0.05f * walkLerp; 
+
+            //TODO swap that keys to parameters func
+            int side = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
+            int forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
+
+            Vector3 right = Vector3Normalize(Vector3CrossProduct(pitch, up));
+
+            if (forward != 0)
+            {
+                camera->position = Vector3Add(camera->position, Vector3Scale(right, swayX));
+                camera->position.z += swayY;
+            }
+
+            if (side != 0)
+            {
+                float rollZ = -side * rollAmount; 
+                camera->up = Vector3RotateByAxisAngle(camera->up, pitch, rollZ);
+            }
+        }
+
+
         camera->target = Vector3Add(camera->position, pitch);
+
+
+
+
     }
 
     float PlayerFP::GetCurrentPlayerHeight()
@@ -329,7 +361,7 @@
         std::cout << hpPlayer << std::endl;
     }
 
-    void PlayerFP::deathPlayer() {
+    void PlayerFP::DeathPlayer() {
         //TODO
     }
 
@@ -338,6 +370,6 @@
         invetoryWeight += i;
     }
 
-    float PlayerFP::getBackpackPercent(){
+    float PlayerFP::GetBackpackPercent(){
         return (float)invetoryWeight / (float)invetory_MAX;
     }
