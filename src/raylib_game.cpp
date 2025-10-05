@@ -323,8 +323,8 @@ static void UpdateGame(void) {
                         DrawText((std::to_string(player.invetoryWeight) + " kg").c_str(), 40, screenHeight - 60, 50, backpackCol);
                         DrawRectangleLinesEx(backpackRec, 5, backpackCol);
                         DrawRectangle(backpackRec.x,
-                            backpackRec.y + (backpackRec.height * (1 - player.getBackpackPercent())),
-                            backpackRec.width, backpackRec.height * player.getBackpackPercent(),
+                            backpackRec.y + (backpackRec.height * (1 - player.GetBackpackPercent())),
+                            backpackRec.width, backpackRec.height * player.GetBackpackPercent(),
                             backpackCol);
                     }
 
@@ -365,7 +365,7 @@ static void UpdateGame(void) {
 
                     }
                 }
-            }
+            
 
             //Backpack HUD
             {
