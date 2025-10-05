@@ -220,8 +220,9 @@ static void UpdateGame(void) {
     door1->Update(d);
     //lights[0].position = player->camera.position;
     //lights[0].target = player->CameraRay().direction;
-    LM_Light& edit = gLightMgr->Get(0);
-    edit.angle = fmodf((float)GetTime(), 1.0f) * 45.f;
+    
+    //LM_Light& edit = gLightMgr->Get(0);
+    //edit.angle = fmodf((float)GetTime(), 1.0f) * 45.f;
 
     if(!freezeLightCooling)gLightMgr->SyncToGPU(player.camera);
 
@@ -263,7 +264,6 @@ static void UpdateGame(void) {
         DrawText(Vec3ToString(player.position).c_str(), 10, 50, 30, RED);
         DrawText((FloatToString(Vector3Length(player.velocity)) + " | " + Vec3ToString(player.velocity)).c_str(), 10, 80, 30, player.isGrounded ? YELLOW : SKYBLUE);
 
-
         //HUD
 
         //Backpack HUD
@@ -279,6 +279,21 @@ static void UpdateGame(void) {
                 backpackRec.width, backpackRec.height * player.getBackpackPercent(),
                 backpackCol);
         }
+
+        //DrawHomeLocation
+        {
+            vec3 homeLoc = Vector3Zeros;
+
+            if (Vector3DotProduct(player.CameraRay().direction, Vector3Normalize(homeLoc - player.camera.position)) > 0) {
+                const Color homeCol = Color{ 0, 229, 0, 200 };
+                vec2 coord = GetWorldToScreen(homeLoc, player.camera);
+                Rectangle homeRec = { coord.x - 15, coord.y - 15, 30, 30 };
+                DrawRectangleLinesEx(homeRec, 5, homeCol);
+                std::string homeStr = "Home " + std::to_string((int)Vector3Distance(homeLoc, player.camera.position) / 5) + " m";
+                DrawText(homeStr.c_str(), homeRec.x - 15, homeRec.y + 40, 20, homeCol);
+            }
+        }
+
         
 
         //screenWidth
