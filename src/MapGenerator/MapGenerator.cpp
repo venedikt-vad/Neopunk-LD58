@@ -14,15 +14,15 @@ MapGenerator::MapGenerator(Shader sh, LightManager* LightM) {
     mat = LoadMaterialDefault();
     mat.shader = sh;
 
-    for (size_t i = 0; i < 1; i++) {
-        std::string path = "resources/tileEmpty";
+    for (size_t i = 0; i < 2; i++) {
+        std::string path = "resources/MapTiles/tileModel";
         path += std::to_string(i);
         path += ".obj";
         mapElements.push_back(LoadModel(path.c_str()));
         mapElements[mapElements.size() - 1].materials[0] = mat;
         mapElements[mapElements.size() - 1].materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
-        path = "resources/tileLights";
+        path = "resources/MapTiles/tileLights";
         path += std::to_string(i);
         path += ".obj"; 
         Model lightsM = LoadModel(path.c_str());
@@ -50,7 +50,9 @@ void MapGenerator::Generate(int size){
     mapSize = size;
 
     LM_Light L{};
-    L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 15.f; L.angle = 20.f; L.color = { 255,255,255,255 }; L.intensity = 15;
+    
+
+    L.type = LM_SPOT; L.enabled = LM_SIMPLE_AND_VOLUMETRIC; L.radius = 40.f; L.angle = 20.f;  L.intensity = 15;
     L.direction = Vector3UnitZ * -1;
 
     Model pickableM = LoadModel("resources/UnitCube.obj");
@@ -64,6 +66,11 @@ void MapGenerator::Generate(int size){
 
             vec3 pos = { x * MAP_TILE_SIZE,y * MAP_TILE_SIZE,0 };
             for (vec3 v : lights[v[y]]) {
+                float rndF = randomFloat0to1();
+                unsigned char b = 155 + (int)(100 * randomFloat0to1());
+                unsigned char rg = 155 + (int)(100 * (1 - randomFloat0to1()));
+                L.color = { rg,rg,b,255 };
+
                 L.position = v + pos;
                 LM->Add(L);
             }

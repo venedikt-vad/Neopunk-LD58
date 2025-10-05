@@ -214,8 +214,8 @@ static void UpdateGame(void) {
     if(IsKeyPressed(KEY_ENTER) && IsKeyDown(KEY_LEFT_ALT)) ToggleFullscreen();
     if (IsKeyPressed(KEY_L)) freezeLightCooling = !freezeLightCooling;
     
-    em1->Update(d);
-    em2->Update(d);
+    //em1->Update(d);
+    //em2->Update(d);
 
     door1->Update(d);
     //lights[0].position = player->camera.position;
@@ -237,9 +237,9 @@ static void UpdateGame(void) {
             map->Draw();
             //DrawMesh(modelMap.meshes[0], modelMap.materials[0], mapMatrix);
             // DrawModel(modelTV, { 0.f, 0.f, 3.f }, 1.f, WHITE);
-            em1->Draw(player.camera);
+            //em1->Draw(player.camera);
 
-            em2->Draw(player.camera);
+            //em2->Draw(player.camera);
 
             objManager.DrawObjects();
 
