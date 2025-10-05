@@ -43,7 +43,15 @@
                                         "resources/sounds/running8.wav",
                                         "resources/sounds/running9.wav",
                                         "resources/sounds/running10.wav",
-                                        "resources/sounds/running11.wav"});
+                                        "resources/sounds/running11.wav",
+                                        "resources/sounds/running12.wav",
+                                        "resources/sounds/running13.wav",
+                                        "resources/sounds/running14.wav",
+                                        "resources/sounds/running15.wav",
+                                        "resources/sounds/running16.wav",
+                                        "resources/sounds/running17.wav",
+                                        "resources/sounds/running18.wav",
+                                        "resources/sounds/running19.wav"});
 
         DisableCursor();
     }
