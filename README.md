@@ -25,6 +25,8 @@ You are a scrap collector, living in dark industrial city. Collect the metal exp
 ![SC03](screenshots/screenshot03.jpg "SC03")
 
 ## Getting Started
+<details>
+  <summary>Project setup</summary>
 
 #### Linux
 When setting up this template on linux for the first time, install the dependencies from this page:
@@ -67,6 +69,7 @@ cmake --build build
 - In order for resources to load properly, cd to `src` and run the executable (`../build/${PROJECT_NAME}/${PROJECT_NAME}`) from there.
 
 - cmake will automatically download a current release of raylib but if you want to use your local version you can pass `-DFETCHCONTENT_SOURCE_DIR_RAYLIB=<dir_with_raylib>` 
+</details>
 
 ## License
 
