@@ -13,14 +13,17 @@ You are a scrap collector, living in dark industrial city. Collect the metal exp
  - [LD58 Submisson](https://ldjam.com/events/ludum-dare/58/neopunk)
 
 ### Controls
-E - Interaction
-WASD - Movement
-SPACE - Jump
-ALT+ENTER - Switch fullscreen
-ESC - Quit
+- **E** - Interaction
+- **WASD** - Movement
+- **SPACE** - Jump
+- **ALT+ENTER** - Switch fullscreen
+- **ESC** - Quit
 
 ### Screenshots
 _TODO: Show your game to the world, animated GIFs recommended!._
+![SC01](screenshots/screenshot01.jpg "SC01")
+![SC05](screenshots/screenshot05.jpg "SC05")
+![SC03](screenshots/screenshot03.jpg "SC03")
 
 ## Getting Started
 
