@@ -80,6 +80,8 @@ class PlayerFP {
         int invetory_MAX = 20;
         int hpPlayer;
 
+        int day = 1;
+
         void HaveDamage(int damage);
 
         void DeathPlayer();

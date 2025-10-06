@@ -1,7 +1,6 @@
 #include "EnemyTV.h"
 #include "PlayerFP.h"
 #include "Collision/CollisionManager.h"
-#include <iostream>
 #include <VVADExtras.h>
 
 bool IsCameraLookingAtObject(Camera3D camera, Vector3 objectPosition, float threshold = 0.8f)

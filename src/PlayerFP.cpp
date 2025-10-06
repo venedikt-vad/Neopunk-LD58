@@ -1,5 +1,4 @@
 #include "PlayerFP.h"
-#include <iostream>
 
 #define NORMALIZE_INPUT
 
@@ -397,16 +396,13 @@
         if (hpPlayer >= 0) {
             PlaySound(hitSound);
         }
-        //std::cout << hpPlayer << std::endl;
     }
 
     void PlayerFP::DeathPlayer() {
-        //TODO
     }
 
-    void PlayerFP::AddObjToInventory(int i)
-    {
-        invetoryWeight += i;
+    void PlayerFP::AddObjToInventory(int i){
+        invetoryWeight = Clamp(invetoryWeight+i, 0, invetory_MAX);
     }
 
     float PlayerFP::GetBackpackPercent(){

@@ -1,6 +1,5 @@
 #include "Mine.h"
 #include "PlayerFP.h"
-#include <iostream>
 #include <VVADExtras.h>
 
 Sound3d* Mine::expSound = nullptr; 

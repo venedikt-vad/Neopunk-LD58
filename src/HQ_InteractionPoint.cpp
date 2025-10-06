@@ -15,15 +15,19 @@ void HQ_InteractionPoint::ResultInteract() {
 
 	if (collectedQuota >= quota) {
 		isQuotaComplete = true;
+		player.invetoryWeight = collectedQuota - quota;
+		collectedQuota = quota;
+	} else {
+		player.invetoryWeight = 0;
 	}
 }
 
 HQ_InteractionPoint::HQ_InteractionPoint() {
-
+	NewQuota();
 }
 
 HQ_InteractionPoint::HQ_InteractionPoint(Transform transform, int interactiveKey) : InteractiveObject({0}, transform, interactiveKey, false) {
-	//TODO
+	NewQuota();
 }
 
 HQ_InteractionPoint::~HQ_InteractionPoint() {
@@ -31,7 +35,9 @@ HQ_InteractionPoint::~HQ_InteractionPoint() {
 }
 
 void HQ_InteractionPoint::NewQuota() {
-	quota = GetRandomValue(12,20);
+	PlayerFP& player = PlayerFP::Instance();
+
+	quota = GetRandomValue(5,7) * player.day;
 	isQuotaComplete = false;
 	collectedQuota = 0;
 }

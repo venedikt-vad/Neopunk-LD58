@@ -1,6 +1,5 @@
 #include "Laser.h"
 #include "PlayerFP.h"
-#include <iostream>
 #include <VVADExtras.h>
 
 Laser::Laser() {

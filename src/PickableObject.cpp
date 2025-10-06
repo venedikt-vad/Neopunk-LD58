@@ -10,11 +10,11 @@
 void PickableObject::ResultInteract() {
 	ObjectManager& objManager = ObjectManager::Instance();
 	PlayerFP& player = PlayerFP::Instance();
+	if (player.invetoryWeight < player.invetory_MAX) {
+		player.AddObjToInventory(weightObject);
 
-	player.AddObjToInventory(weightObject);
-
-	objManager.Delete(this->GetIndex());
-
+		objManager.Delete(this->GetIndex());
+	}
 }
 
 PickableObject::PickableObject() {
