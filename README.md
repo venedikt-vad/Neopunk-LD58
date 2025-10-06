@@ -20,7 +20,6 @@ You are a scrap collector, living in dark industrial city. Collect the metal exp
 - **ESC** - Quit
 
 ### Screenshots
-_TODO: Show your game to the world, animated GIFs recommended!._
 ![SC01](screenshots/screenshot01.jpg "SC01")
 ![SC05](screenshots/screenshot05.jpg "SC05")
 ![SC03](screenshots/screenshot03.jpg "SC03")
